@@ -1,0 +1,1807 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PaperBoots — Contractor Field Paperwork</title>
+<style>
+  :root{
+    --navy:#16324f; --navy2:#1f4e79; --accent:#e8a33d; --ink:#1c2733;
+    --muted:#5c6b7a; --line:#d5dde5; --bg:#eef2f6; --card:#ffffff;
+    --good:#1e7d46; --warn:#b45309; --bad:#b3261e; --open:#6b7280;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;background:var(--bg);color:var(--ink);font-size:15px;line-height:1.45}
+  button{font:inherit;cursor:pointer}
+  input,select,textarea{font:inherit;color:var(--ink)}
+  a{color:var(--navy2)}
+
+  /* ---------- App header ---------- */
+  .app-header{background:var(--navy);color:#fff;padding:14px 18px;display:flex;flex-wrap:wrap;align-items:center;gap:10px}
+  .app-header .logo{font-size:26px;font-weight:800;letter-spacing:.5px;color:var(--accent);border:2px solid var(--accent);border-radius:8px;padding:2px 10px;white-space:nowrap}
+  .app-header .co-name{font-size:19px;font-weight:700;line-height:1.2}
+  .app-header .co-sub{font-size:12.5px;color:#c8d6e4}
+  .app-header .spacer{flex:1}
+  .app-header .tag{font-size:12px;color:#c8d6e4;text-align:right}
+
+  /* ---------- Nav ---------- */
+  .nav{background:var(--navy2);display:flex;flex-wrap:wrap;gap:6px;padding:8px 12px;position:sticky;top:0;z-index:20}
+  .nav button{background:transparent;border:1px solid rgba(255,255,255,.35);color:#fff;border-radius:20px;padding:8px 14px;min-height:42px;font-weight:600}
+  .nav button.active{background:var(--accent);border-color:var(--accent);color:#221a08}
+  .nav button.new{background:rgba(255,255,255,.12)}
+
+  main{max-width:1080px;margin:0 auto;padding:16px 14px 60px}
+  .view{display:none}
+  .view.active{display:block}
+
+  /* ---------- Cards / stats ---------- */
+  .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:6px 0 16px}
+  .stat{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:12px 14px}
+  .stat .n{font-size:24px;font-weight:800;color:var(--navy)}
+  .stat .l{font-size:12.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px}
+
+  .card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:16px;margin:0 0 14px}
+  .card h2{margin:0 0 4px;font-size:19px;color:var(--navy)}
+  .card h3{margin:14px 0 6px;font-size:15.5px;color:var(--navy)}
+  .hint{color:var(--muted);font-size:13.5px;margin:0 0 10px}
+
+  /* ---------- Library ---------- */
+  .lib-tools{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px}
+  .lib-tools input[type=search]{flex:1 1 220px;padding:11px 12px;border:1px solid var(--line);border-radius:8px;min-height:46px}
+  .lib-tools select{padding:11px;border:1px solid var(--line);border-radius:8px;min-height:46px;background:#fff}
+  .doc-row{display:flex;flex-wrap:wrap;gap:8px;align-items:center;border:1px solid var(--line);border-radius:10px;padding:11px 12px;margin-bottom:8px;background:#fff}
+  .doc-row .badge{font-size:11.5px;font-weight:700;letter-spacing:.4px;border-radius:12px;padding:3px 9px;color:#fff;white-space:nowrap}
+  .b-co{background:#1f4e79}.b-punch{background:#7c4a03}.b-log{background:#33691e}.b-jsa{background:#8e2424}
+  .doc-row .main{flex:1 1 240px;min-width:200px}
+  .doc-row .t{font-weight:700;overflow-wrap:anywhere}
+  .doc-row .s{font-size:13px;color:var(--muted);overflow-wrap:anywhere}
+  .doc-row .amt{font-weight:700;color:var(--navy);white-space:nowrap}
+  .row-btns{display:flex;gap:6px;flex-wrap:wrap}
+  .btn{border:1px solid var(--line);background:#fff;border-radius:8px;padding:9px 13px;min-height:42px;font-weight:600}
+  .btn.primary{background:var(--navy);border-color:var(--navy);color:#fff}
+  .btn.accent{background:var(--accent);border-color:var(--accent);color:#221a08}
+  .btn.danger{color:var(--bad);border-color:#e3b6b3}
+  .btn.small{padding:6px 10px;min-height:38px;font-size:13.5px;min-height:40px;}
+  .empty{border:1.5px dashed var(--line);border-radius:10px;padding:26px;text-align:center;color:var(--muted);background:#fff}
+
+  /* ---------- Forms ---------- */
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .grid .full{grid-column:1/-1}
+  label.f{display:block;font-size:13px;font-weight:700;color:var(--navy);margin:0 0 4px}
+  .field input,.field select,.field textarea{width:100%;padding:10px 11px;border:1px solid var(--line);border-radius:8px;background:#fff;min-height:44px}
+  .field textarea{min-height:74px;resize:vertical}
+  .field .note{font-size:12px;color:var(--muted);margin-top:3px}
+  .form-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px}
+  .msg{border-radius:8px;padding:10px 12px;margin:0 0 12px;display:none}
+  .msg.err{display:block;background:#fdeceb;border:1px solid #e3b6b3;color:#7c1d18}
+  .msg.ok{display:block;background:#e7f5ec;border:1px solid #a8d5bb;color:#14532d}
+
+  table.items{width:100%;border-collapse:collapse;margin-top:6px}
+  table.items th,table.items td{border:1px solid var(--line);padding:7px;vertical-align:top;text-align:left}
+  table.items th{background:#f0f4f8;font-size:12.5px;color:var(--navy)}
+  table.items input,table.items select,table.items textarea{width:100%;border:1px solid transparent;border-radius:6px;padding:7px;background:#fbfcfd;min-height:38px}
+  table.items input:focus,table.items select:focus,table.items textarea:focus{border-color:var(--navy2);outline:none;background:#fff}
+  table.items textarea{min-height:38px;resize:vertical}
+  .status-pill{font-weight:700;font-size:12.5px;border-radius:10px;padding:2px 8px;white-space:nowrap}
+  .st-open{background:#eceff1;color:#455a64}.st-done{background:#fff3d6;color:#7c4a03}.st-verified{background:#dff2e4;color:#14532d}
+  .st-pending{background:#eceff1;color:#455a64}.st-approved{background:#dff2e4;color:#14532d}.st-rejected{background:#fdeceb;color:#7c1d18}
+
+  .haz-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:8px;margin:6px 0 10px}
+  .haz{display:flex;gap:9px;align-items:flex-start;border:1px solid var(--line);border-radius:8px;padding:9px 10px;background:#fff;cursor:pointer}
+  .haz input{width:20px;height:20px;margin-top:1px;flex:none}
+  .haz span{font-weight:600;font-size:14px}
+  .progress-wrap{background:#e4eaf0;border-radius:8px;height:16px;overflow:hidden;margin:6px 0}
+  .progress-bar{background:var(--good);height:100%;width:0%}
+  .total-box{background:#f0f4f8;border:1px solid var(--line);border-radius:8px;padding:12px;margin-top:12px}
+  .total-box .row{display:flex;justify-content:space-between;gap:10px;padding:3px 0;font-size:14.5px}
+  .total-box .row.grand{border-top:2px solid var(--navy);margin-top:6px;padding-top:8px;font-weight:800;font-size:16.5px;color:var(--navy)}
+  .sig-preview{font-family:"Segoe Script","Brush Script MT",cursive;font-size:21px;color:#20303f}
+  .punch-thumb{width:76px;height:76px;object-fit:cover;border-radius:6px;display:block;margin-bottom:6px;border:1px solid var(--line);background:#f0f4f8}
+  .punch-photo-btn{display:inline-flex;align-items:center;min-height:40px;cursor:pointer}
+  .punch-photo-cell{min-width:118px}
+
+  .help h3{color:var(--navy);margin:16px 0 4px}
+  .help p,.help li{font-size:14.5px}
+  .toast{position:fixed;left:50%;transform:translateX(-50%);bottom:22px;background:var(--navy);color:#fff;padding:11px 18px;border-radius:22px;font-weight:600;opacity:0;pointer-events:none;transition:opacity .25s;z-index:99;max-width:92vw;text-align:center}
+  .toast.show{opacity:1}
+
+  /* ---------- Print sheet (screen) ---------- */
+  #printSheet{display:none}
+
+  @media (max-width:640px){
+    .grid{grid-template-columns:1fr}
+    table.items th:nth-child(1){width:auto}
+    .app-header .tag{display:none}
+    main{padding:12px 9px 50px}
+    .card{padding:13px}
+  }
+
+  /* ---------- Print ---------- */
+  @media print{
+    body{background:#fff}
+    .app-header,.nav,main,.toast{display:none !important}
+    #printSheet{display:block !important;color:#000;font-size:12.5px}
+    #printSheet .sheet{page-break-after:always;padding:6mm 4mm}
+    #printSheet .sheet:last-child{page-break-after:auto}
+    #printSheet h1{font-size:19px;margin:0;color:#000}
+    #printSheet h2{font-size:15px;margin:14px 0 6px;border-bottom:2px solid #000;padding-bottom:3px;color:#000}
+    #printSheet .p-head{display:flex;justify-content:space-between;gap:14px;border-bottom:3px double #000;padding-bottom:10px;margin-bottom:12px}
+    #printSheet .p-logo{font-size:24px;font-weight:800;letter-spacing:.5px}
+    #printSheet .p-co{font-size:15px;font-weight:700}
+    #printSheet .p-sub{font-size:11px;color:#333}
+    #printSheet .p-title{text-align:right}
+    #printSheet .p-title .doc-type{font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:#333}
+    #printSheet table{width:100%;border-collapse:collapse;margin:6px 0 10px}
+    #printSheet th,#printSheet td{border:1px solid #666;padding:5px 7px;text-align:left;vertical-align:top;overflow-wrap:anywhere}
+    #printSheet th{background:#eee;font-size:11.5px}
+    #printSheet .kv{display:grid;grid-template-columns:1fr 1fr;gap:4px 22px;margin:8px 0}
+    #printSheet .kv div{overflow-wrap:anywhere}
+    #printSheet .kv b{display:inline-block;min-width:118px;color:#222}
+    #printSheet .para{white-space:pre-wrap;overflow-wrap:anywhere;border:1px solid #999;padding:8px;min-height:34px;margin:4px 0 10px}
+    #printSheet .sig-grid{display:grid;grid-template-columns:1fr 1fr;gap:26px;margin-top:26px}
+    #printSheet .sig-line{border-bottom:1.5px solid #000;min-height:30px;display:flex;align-items:flex-end;padding:0 2px 2px}
+    #printSheet .sig-name{font-family:"Segoe Script","Brush Script MT",cursive;font-size:19px}
+    #printSheet .sig-cap{font-size:10.5px;color:#333;margin-top:3px}
+    #printSheet .foot{margin-top:18px;font-size:10.5px;color:#444;border-top:1px solid #999;padding-top:6px}
+    #printSheet .check{font-size:14px}
+    #printSheet tr{page-break-inside:avoid}
+    #printSheet img.p-photo{width:72px;height:72px;object-fit:cover;display:block;margin-bottom:4px}
+    @page{margin:12mm}
+  }
+</style>
+</head>
+<body>
+
+<header class="app-header">
+  <div class="logo" id="brandLogo">PB</div>
+  <div>
+    <div class="co-name" id="brandName">PaperBoots</div>
+    <div class="co-sub" id="brandSub">Set up your company profile to brand every document</div>
+  </div>
+  <div class="spacer"></div>
+  <div class="tag">Change Orders · Punch Lists<br>Daily Logs · Safety Assessments</div>
+</header>
+<div style="text-align:center;padding:12px 16px;background:#fff8e6;border-bottom:2px solid #e8a13a;"><a href="https://travisbriggs.gumroad.com/l/yaanpb" target="_blank" rel="noopener" style="display:inline-block;background:#e8a13a;color:#1d2b2e;font-weight:800;font-size:17px;padding:10px 22px;border-radius:8px;text-decoration:none;">Get the full version — $99</a></div>
+
+
+<nav class="nav" id="mainNav">
+  <button data-nav="library" class="active">📁 Document Library</button>
+  <button data-nav="co" class="new">+ Change Order</button>
+  <button data-nav="punch" class="new">+ Punch List</button>
+  <button data-nav="log" class="new">+ Daily Log</button>
+  <button data-nav="jsa" class="new">+ Safety Assessment</button>
+  <button data-nav="company">🏢 Company Profile</button>
+  <button data-nav="help">❓ Help</button>
+</nav>
+
+<main>
+  <!-- ============ LIBRARY ============ -->
+  <section class="view active" id="view-library">
+    <div class="stats" id="libStats"></div>
+    <div class="card">
+      <h2>Document Library</h2>
+      <p class="hint">Every document you create is saved in this browser on this device. Search by job, customer, date or any word in the document. Print gives you a clean, branded sheet to hand to the customer or crew.</p>
+      <div class="lib-tools">
+        <input type="search" id="libSearch" placeholder="Search jobs, customers, dates, words…" aria-label="Search documents">
+        <select id="libFilter" aria-label="Filter by document type">
+          <option value="">All document types</option>
+          <option value="co">Change Orders</option>
+          <option value="punch">Punch Lists</option>
+          <option value="log">Daily Logs</option>
+          <option value="jsa">Safety Assessments</option>
+        </select>
+      </div>
+      <div id="libList"></div>
+      <div class="form-actions">
+        <button class="btn" id="btnExport">⬇ Export backup (JSON)</button>
+        <button class="btn" id="btnImport">⬆ Import backup</button>
+        <input type="file" id="importFile" accept=".json,application/json" style="display:none">
+        <button class="btn danger" id="btnClearDemo">Clear demo data</button>
+      </div>
+      <p class="hint" style="margin-top:10px">Tip: export a backup before switching phones or browsers — your documents live in this browser's storage, not in the cloud.</p>
+    </div>
+  </section>
+
+  <!-- ============ EDITOR (built by JS) ============ -->
+  <section class="view" id="view-editor"></section>
+
+  <!-- ============ COMPANY PROFILE ============ -->
+  <section class="view" id="view-company">
+    <div class="card">
+      <h2>Company Profile</h2>
+      <p class="hint">This information prints at the top of every document. Your logo is shown as text (initials or a short wordmark) — no image upload needed.</p>
+      <div id="coMsg" class="msg"></div>
+      <div class="grid">
+        <div class="field"><label class="f" for="cp_name">Company name *</label><input id="cp_name" type="text" placeholder="e.g., Summit Builders LLC"></div>
+        <div class="field"><label class="f" for="cp_logo">Logo text (wordmark / initials)</label><input id="cp_logo" type="text" maxlength="14" placeholder="e.g., SB"><div class="note">Shown as your logo in the app header and on printed documents.</div></div>
+        <div class="field"><label class="f" for="cp_phone">Phone</label><input id="cp_phone" type="tel" placeholder="(918) 555-0123"></div>
+        <div class="field"><label class="f" for="cp_email">Email</label><input id="cp_email" type="email" placeholder="office@example.com"></div>
+        <div class="field"><label class="f" for="cp_license">License #</label><input id="cp_license" type="text" placeholder="e.g., OK GC #12345"></div>
+        <div class="field"><label class="f" for="cp_address">Address</label><input id="cp_address" type="text" placeholder="Street, City, ST ZIP"></div>
+      </div>
+      <div class="form-actions">
+        <button class="btn primary" id="btnSaveCompany">Save company profile</button>
+        <button class="btn danger" id="btnEraseAll">Erase ALL data…</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ HELP ============ -->
+  <section class="view help" id="view-help">
+    <div class="card"><h3 style="margin-top:0">Legal</h3><p>Terms of Use, the applicable disclaimer, our privacy statement, and your recorded acceptance.</p><button type="button" class="btn ww-legal-open-btn" data-ww-legal="1">⚖️ Legal — Terms, Disclaimer &amp; Privacy</button></div>
+    <div class="card">
+      <h2>Help — how PaperBoots works</h2>
+      <h3>The four documents</h3>
+      <ul>
+        <li><b>Change Order</b> — Records a change to the job, what it costs (negative = credit back to the customer), how many days it adds or removes, and whether the customer approved it. The app keeps a running total of <i>approved</i> change orders for each job, printed right on the document so nobody argues about the number later.</li>
+        <li><b>Punch List</b> — The walk-through fix-it list, organized by room or area. Mark each item Open → Done → Verified as you close it out. Completion percentage is calculated for you. Tap <b>📷 Photo</b> on an item to take or pick a photo of the problem — it is shrunk to a small thumbnail, stored with the item on this device only, shown on the item, and printed on the walk-through sheet. The Photo ref field is still there if you also want to note a camera-roll file name (e.g., "IMG_2041").</li>
+        <li><b>Daily Log</b> — The day's record: weather, crew on site, work performed, materials delivered, delays and visitors. These logs are what win (or settle) disputes months later.</li>
+        <li><b>Job Safety Assessment (JSA)</b> — Pick the hazards for the task, write the controls and PPE for each, and have the crew sign off by name before work starts.</li>
+      </ul>
+      <h3>Working tips</h3>
+      <ul>
+        <li><b>Same job name = same job.</b> Type a job name exactly the same way on every document and the app ties them together — change-order totals, search and the library all group by job name (capitals don't matter).</li>
+        <li><b>Duplicate as template</b> — The Duplicate button copies a document so you can reuse its wording. Signatures are cleared, dates reset to today, punch items reset to Open, and change orders go back to Pending.</li>
+        <li><b>Signatures</b> — Type the name in the signature box; it prints on the signature line in a script style. Have the customer sign the printed sheet as well if you want a wet signature for your files.</li>
+        <li><b>Printing</b> — Print works from any saved document (Print button in the library or in the editor). Use your browser's "Save as PDF" if you want a file to text or email.</li>
+        <li><b>Your data stays on your device.</b> Everything is stored in this browser on this phone/computer. Nothing is uploaded anywhere. Use <b>Export backup</b> in the library to save a copy, and <b>Import backup</b> to restore it on a new device.</li>
+        <li><b>Demo data</b> — The app comes with one sample job ("Johnson Kitchen Remodel") with one of each document. "Clear demo data" in the library removes only those samples, never your real documents.</li>
+      </ul>
+      <h3>Known limits of this version</h3>
+      <ul>
+        <li>Punch-list photos: one photo per item, stored as a small thumbnail on this device only — it is never uploaded anywhere. The other document types do not take photos.</li>
+        <li>One device at a time — there's no cloud sync between a phone and an office computer. Export/import moves data manually.</li>
+        <li>Signature is a typed name rendered in script style, not a drawn signature.</li>
+      </ul>
+      <h3>Need help?</h3>
+      <p id="helpVersion">PaperBoots v1.1</p>
+      <p><a id="helpEmailBtn" class="btn" style="display:inline-flex;align-items:center;min-height:48px;text-decoration:none" href="mailto:whitewolfbackoffice@gmail.com?subject=PaperBoots%20help%20%E2%80%94%20v1.1&amp;body=Tell%20us%20what%20you%20were%20trying%20to%20do%20and%20what%20happened%3A%0A%0A">✉️ Email us</a></p>
+      <p class="hint">The button opens your own mail app with our address and the app version already in the subject line — nothing is sent until you press send there.</p>
+    </div>
+  </section>
+</main>
+
+<div id="printSheet"></div>
+<div class="toast" id="toast"></div>
+
+<script>
+"use strict";
+/* ================================================================
+   PaperBoots — single-file contractor field paperwork app.
+   All data lives in localStorage on this device. No network calls.
+   ================================================================ */
+
+var APP_VERSION = "1.1";
+var LS_KEY = "fieldforms_v1";
+var TYPES = {
+  co:    {label:"Change Order",       badge:"b-co",    icon:"📝"},
+  punch: {label:"Punch List",         badge:"b-punch", icon:"✅"},
+  log:   {label:"Daily Log",          badge:"b-log",   icon:"📅"},
+  jsa:   {label:"Safety Assessment",  badge:"b-jsa",   icon:"⛑️"}
+};
+var HAZARDS = [
+  {key:"falls",      name:"Falls from height",        tip:"Guardrails, harness & tie-off, ladder inspection"},
+  {key:"electrical", name:"Electrical",               tip:"GFCI, de-energize/lockout, keep cords out of water"},
+  {key:"excavation", name:"Excavation / trenching",   tip:"Shoring or sloping, locate utilities, ladder every 25 ft"},
+  {key:"ladders",    name:"Ladders & scaffolds",      tip:"3 points of contact, rated ladder, scaffold inspection"},
+  {key:"powertools", name:"Power tools & equipment",  tip:"Guards in place, eye/hearing protection, trained operators only"},
+  {key:"heat",       name:"Heat stress",              tip:"Water/shade/rest cycle, watch for symptoms, acclimate new hands"},
+  {key:"traffic",    name:"Traffic & vehicles",       tip:"Hi-vis, spotter when backing, cones/barriers"},
+  {key:"lifting",    name:"Heavy lifting / strains",  tip:"Team lifts, mechanical aids, lift with legs"},
+  {key:"dust",       name:"Dust & silica",            tip:"Wet cutting, respirator, ventilation"},
+  {key:"fire",       name:"Fire & hot work",          tip:"Extinguisher on hand, clear combustibles, fire watch"}
+];
+
+/* ---------------- utilities (pure, unit-tested) ---------------- */
+function esc(s){
+  return String(s == null ? "" : s)
+    .replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;")
+    .replace(/"/g,"&quot;").replace(/'/g,"&#39;");
+}
+function uid(){
+  return "d" + Date.now().toString(36) + Math.random().toString(36).slice(2,8);
+}
+function todayISO(){
+  var d = new Date();
+  var m = String(d.getMonth()+1).padStart(2,"0");
+  var day = String(d.getDate()).padStart(2,"0");
+  return d.getFullYear() + "-" + m + "-" + day;
+}
+var MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+function fmtDate(iso){
+  if(!iso || typeof iso !== "string") return "";
+  var p = iso.split("-");
+  if(p.length !== 3) return iso;
+  var y = parseInt(p[0],10), m = parseInt(p[1],10), d = parseInt(p[2],10);
+  if(isNaN(y)||isNaN(m)||isNaN(d)||m<1||m>12||d<1||d>31) return iso;
+  return MONTHS[m-1] + " " + d + ", " + y;
+}
+function parseMoney(v){
+  if(typeof v === "number") return isFinite(v) ? v : 0;
+  if(v == null) return 0;
+  var s = String(v).replace(/[$,\s]/g,"");
+  if(s === "" || s === "-" ) return 0;
+  var n = parseFloat(s);
+  return isNaN(n) || !isFinite(n) ? 0 : n;
+}
+function fmtMoney(n){
+  n = typeof n === "number" && isFinite(n) ? n : 0;
+  var neg = n < 0;
+  var a = Math.abs(n);
+  var parts = a.toFixed(2).split(".");
+  parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g,",");
+  return (neg ? "-$" : "$") + parts[0] + "." + parts[1];
+}
+function normJob(s){ return String(s == null ? "" : s).trim().toLowerCase(); }
+
+/* Change-order math: totals across all COs sharing a job name. */
+function coTotalsForJob(docs, jobName, excludeId){
+  var approved = 0, pending = 0, count = 0, approvedCount = 0;
+  var key = normJob(jobName);
+  (docs || []).forEach(function(d){
+    if(d.type !== "co" || d.id === excludeId) return;
+    if(normJob(d.data.jobName) !== key) return;
+    count++;
+    var amt = parseMoney(d.data.costImpact);
+    if(d.data.status === "approved"){ approved += amt; approvedCount++; }
+    else if(d.data.status === "pending"){ pending += amt; }
+  });
+  return {approved:approved, pending:pending, count:count, approvedCount:approvedCount};
+}
+function coNumberFor(docs, jobName, excludeId){
+  var t = coTotalsForJob(docs, jobName, excludeId);
+  return "CO-" + String(t.count + 1).padStart(3,"0");
+}
+/* Punch-list completion: done + verified count as complete. */
+function punchStats(items){
+  var total = (items || []).length, done = 0, verified = 0, open = 0;
+  (items || []).forEach(function(it){
+    if(it.status === "verified") verified++;
+    else if(it.status === "done") done++;
+    else open++;
+  });
+  var complete = done + verified;
+  var pct = total === 0 ? 0 : Math.round(complete / total * 100);
+  return {total:total, done:done, verified:verified, open:open, complete:complete, pct:pct};
+}
+
+/* ---------- punch-list photo pipeline (adapted from KoiBook) ----------
+   Chosen image is downscaled on a canvas to a THUMBNAIL: longest edge
+   capped at 640px, JPEG quality/size stepped down until the data URL is
+   <= ~120 KB. Only the thumbnail is stored (with the punch item, in the
+   app's on-device storage) - the original full-size file is never kept,
+   so a long punch list stays well inside browser storage limits. */
+function photoApproxBytes(dataUrl){
+  var comma = dataUrl.indexOf(",");
+  if(comma < 0) return dataUrl.length;
+  return Math.floor((dataUrl.length - comma - 1) * 3 / 4);
+}
+function punchCanvasToJpeg(canvas){
+  var qualities = [0.8, 0.7, 0.6, 0.5, 0.4, 0.3];
+  var cur = canvas;
+  for(var attempt = 0; attempt < 5; attempt++){
+    for(var q = 0; q < qualities.length; q++){
+      var url = cur.toDataURL("image/jpeg", qualities[q]);
+      if(photoApproxBytes(url) <= 120 * 1024) return url;
+      if(q === qualities.length - 1 && attempt === 4) return url;
+    }
+    var next = document.createElement("canvas");
+    next.width = Math.max(1, Math.floor(cur.width * 0.8));
+    next.height = Math.max(1, Math.floor(cur.height * 0.8));
+    next.getContext("2d").drawImage(cur, 0, 0, next.width, next.height);
+    cur = next;
+  }
+  return cur.toDataURL("image/jpeg", 0.3);
+}
+function compressPunchPhoto(file, cb){
+  var objUrl = null;
+  try{ objUrl = URL.createObjectURL(file); }catch(e){ cb(null); return; }
+  var img = new Image();
+  img.onload = function(){
+    try{
+      var w = img.naturalWidth || img.width, h = img.naturalHeight || img.height;
+      if(!w || !h){ URL.revokeObjectURL(objUrl); cb(null); return; }
+      var scale = Math.min(1, 640 / Math.max(w, h));
+      var canvas = document.createElement("canvas");
+      canvas.width = Math.max(1, Math.round(w * scale));
+      canvas.height = Math.max(1, Math.round(h * scale));
+      canvas.getContext("2d").drawImage(img, 0, 0, canvas.width, canvas.height);
+      URL.revokeObjectURL(objUrl);
+      cb(punchCanvasToJpeg(canvas));
+    }catch(e){ try{ URL.revokeObjectURL(objUrl); }catch(e2){} cb(null); }
+  };
+  img.onerror = function(){ try{ URL.revokeObjectURL(objUrl); }catch(e){} cb(null); };
+  img.src = objUrl;
+}
+
+/* ---------------- state ---------------- */
+function blankCompany(){ return {name:"", logo:"", phone:"", email:"", license:"", address:""}; }
+function demoDocs(){
+  var j = "Johnson Kitchen Remodel", c = "Mark & Lisa Johnson";
+  return [
+    {id:"demo-co", type:"co", demo:true, createdAt:Date.now()-400000, updatedAt:Date.now()-400000,
+     data:{jobName:j, customer:c, date:"2026-10-24", number:"CO-001",
+       description:"Add under-cabinet LED lighting (not in original scope) and swap the sink to a farmhouse apron-front model per customer request.",
+       costImpact:1450, scheduleImpact:2, status:"approved",
+       notes:"Customer approved verbally 10/24, signed copy on file.", sigCustomer:"Mark Johnson", sigCustomerDate:"2026-10-24", sigCompany:"", sigCompanyDate:""}},
+    {id:"demo-punch", type:"punch", demo:true, createdAt:Date.now()-300000, updatedAt:Date.now()-300000,
+     data:{jobName:j, customer:c, date:"2026-10-26",
+       items:[
+         {area:"Kitchen", description:"Touch up paint scuff on wall by pantry door", status:"verified", photoRef:"IMG_2041"},
+         {area:"Kitchen", description:"Adjust soft-close hinge on corner lazy-susan cabinet", status:"done", photoRef:""},
+         {area:"Kitchen", description:"Re-caulk backsplash gap at stove wall", status:"open", photoRef:""},
+         {area:"Hallway", description:"Patch and paint nail pop near thermostat", status:"open", photoRef:"IMG_2055"}
+       ],
+       notes:"Final walk-through scheduled Friday 10/30 at 4 PM.", sigCustomer:"", sigCustomerDate:"", sigCompany:"", sigCompanyDate:""}},
+    {id:"demo-log", type:"log", demo:true, createdAt:Date.now()-200000, updatedAt:Date.now()-200000,
+     data:{jobName:j, customer:c, date:"2026-10-26", weather:"Clear, 68°F, light wind", crew:"Alex (lead), Chris — 2 on site, 7:30 AM–4:00 PM",
+       workPerformed:"Finished cabinet hardware install. Set farmhouse sink and connected supply lines. Ran under-cabinet LED rough-in for CO-001.",
+       materials:"Farmhouse sink (delivered 9:15 AM), LED strip kit, 2 tubes silicone caulk.",
+       delays:"Plumber arrived 45 min late; no impact to schedule.", visitors:"Homeowner on site at lunch — approved backsplash tile layout.",
+       notes:"", loggedBy:"Alex"}},
+    {id:"demo-jsa", type:"jsa", demo:true, createdAt:Date.now()-100000, updatedAt:Date.now()-100000,
+     data:{jobName:j, customer:c, date:"2026-10-26", task:"Cabinet installation and sink set — drilling, lifting uppers, plumbing hookup", location:"Kitchen, 214 Oak Bend Ln",
+       hazards:[
+         {name:"Power tools & equipment", controls:"Guards in place on saw; bits checked before use; unplug when changing blades.", ppe:"Safety glasses, hearing protection"},
+         {name:"Heavy lifting / strains", controls:"Two-person lift on all upper cabinets; lift with legs; clear path before carrying.", ppe:"Work gloves, steel-toe boots"},
+         {name:"Ladders & scaffolds", controls:"Step ladder fully opened on level floor; 3 points of contact; no standing on top cap.", ppe:"—"}
+       ],
+       crew:["Alex M.", "Chris A."], supervisor:"Alex M."}}
+  ];
+}
+function freshState(withDemo){
+  return {company:blankCompany(), docs: withDemo ? demoDocs() : []};
+}
+function loadState(){
+  try{
+    var raw = localStorage.getItem(LS_KEY);
+    if(!raw) return null;
+    var s = JSON.parse(raw);
+    if(!s || typeof s !== "object" || !Array.isArray(s.docs)) return null;
+    if(!s.company || typeof s.company !== "object") s.company = blankCompany();
+    return s;
+  }catch(e){ return null; }
+}
+var state = loadState();
+if(!state){ state = freshState(true); saveState(); }
+function saveState(){
+  try{ localStorage.setItem(LS_KEY, JSON.stringify(state)); }
+  catch(e){ toast("⚠ Could not save — browser storage is full or blocked."); }
+}
+function getDoc(id){ return state.docs.find(function(d){ return d.id === id; }) || null; }
+
+/* ---------------- small DOM helpers ---------------- */
+function $(id){ return document.getElementById(id); }
+function toast(msg){
+  var t = $("toast"); if(!t) return;
+  t.textContent = msg; t.classList.add("show");
+  setTimeout(function(){ t.classList.remove("show"); }, 2600);
+}
+function showMsg(el, text, ok){
+  el.textContent = text;
+  el.className = "msg " + (ok ? "ok" : "err");
+}
+function clearMsg(el){ el.className = "msg"; el.textContent = ""; }
+
+/* ---------- Help (§11): rebuild the Email-us href from APP_VERSION at
+   runtime, so a version bump can never leave a stale version in the
+   subject. The static href in the HTML is only a no-JS fallback. ---------- */
+function syncHelpEmail(){
+  var a = $("helpEmailBtn");
+  if(a){
+    a.href = "mailto:whitewolfbackoffice@gmail.com?subject=" + encodeURIComponent("PaperBoots help \u2014 v" + APP_VERSION) +
+      "&body=" + encodeURIComponent("Tell us what you were trying to do and what happened:\n\n");
+  }
+  var v = $("helpVersion");
+  if(v) v.textContent = "PaperBoots v" + APP_VERSION;
+}
+
+/* ---------------- branding ---------------- */
+function renderBrand(){
+  var c = state.company;
+  $("brandLogo").textContent = c.logo || "PB";
+  $("brandName").textContent = c.name || "PaperBoots";
+  var sub = [];
+  if(c.phone) sub.push(c.phone);
+  if(c.email) sub.push(c.email);
+  if(c.license) sub.push("Lic. " + c.license);
+  $("brandSub").textContent = sub.length ? sub.join(" · ") : "Set up your company profile to brand every document";
+}
+
+/* ---------------- navigation ---------------- */
+var currentView = "library";
+function showView(v){
+  currentView = v;
+  ["library","editor","company","help"].forEach(function(name){
+    $("view-" + name).classList.toggle("active", name === v);
+  });
+  document.querySelectorAll("#mainNav button").forEach(function(b){
+    b.classList.toggle("active", b.getAttribute("data-nav") === v ||
+      (v === "editor" && b.getAttribute("data-nav") === "library"));
+  });
+  if(v === "library") renderLibrary();
+  window.scrollTo(0,0);
+}
+document.querySelectorAll("#mainNav button").forEach(function(b){
+  b.addEventListener("click", function(){
+    var nav = b.getAttribute("data-nav");
+    if(nav === "library" || nav === "company" || nav === "help") showView(nav);
+    else openEditor(nav, null);
+  });
+});
+
+/* ---------------- library ---------------- */
+function docTitle(d){
+  var dt = d.data || {};
+  switch(d.type){
+    case "co": return (dt.number || "CO") + " — " + (dt.jobName || "Untitled job");
+    case "punch": return dt.jobName || "Untitled job";
+    case "log": return dt.jobName || "Untitled job";
+    case "jsa": return (dt.task ? dt.task : (dt.jobName || "Untitled job"));
+    default: return dt.jobName || "Document";
+  }
+}
+function docSub(d){
+  var dt = d.data || {};
+  var bits = [];
+  if(dt.customer) bits.push(dt.customer);
+  if(dt.date) bits.push(fmtDate(dt.date));
+  if(d.type === "co") bits.push("Status: " + (dt.status || "pending"));
+  if(d.type === "punch"){ var ps = punchStats(dt.items); bits.push(ps.complete + "/" + ps.total + " complete (" + ps.pct + "%)"); }
+  if(d.type === "jsa" && dt.jobName) bits.push(dt.jobName);
+  return bits.join(" · ");
+}
+function docAmount(d){
+  if(d.type !== "co") return "";
+  return fmtMoney(parseMoney(d.data.costImpact));
+}
+function docSearchText(d){
+  /* The punch-photo thumbnail (a base64 data URL) is stripped before
+     indexing: it is not searchable text and would bloat every search. */
+  var clean = JSON.stringify(d.data || {}, function(k, v){ return k === "photo" ? undefined : v; });
+  return (TYPES[d.type].label + " " + clean).toLowerCase();
+}
+function renderLibrary(){
+  /* stats */
+  var counts = {co:0, punch:0, log:0, jsa:0};
+  var approvedTotal = 0;
+  state.docs.forEach(function(d){
+    if(counts[d.type] != null) counts[d.type]++;
+    if(d.type === "co" && d.data.status === "approved") approvedTotal += parseMoney(d.data.costImpact);
+  });
+  $("libStats").innerHTML =
+    statBox(state.docs.length, "Documents") +
+    statBox(counts.co, "Change orders") +
+    statBox(counts.punch, "Punch lists") +
+    statBox(counts.log + counts.jsa, "Logs & JSAs") +
+    statBox(fmtMoney(approvedTotal), "Approved CO $ (all jobs)");
+
+  var q = ($("libSearch").value || "").toLowerCase().trim();
+  var f = $("libFilter").value;
+  var docs = state.docs.slice().sort(function(a,b){ return (b.updatedAt||0) - (a.updatedAt||0); });
+  var shown = docs.filter(function(d){
+    if(f && d.type !== f) return false;
+    if(q && docSearchText(d).indexOf(q) === -1) return false;
+    return true;
+  });
+  var list = $("libList");
+  if(shown.length === 0){
+    list.innerHTML = '<div class="empty">' +
+      (state.docs.length === 0
+        ? "No documents yet. Tap <b>+ Change Order</b>, <b>+ Punch List</b>, <b>+ Daily Log</b> or <b>+ Safety Assessment</b> above to create your first one."
+        : "No documents match that search.") + "</div>";
+    return;
+  }
+  list.innerHTML = shown.map(function(d){
+    var t = TYPES[d.type];
+    return '<div class="doc-row">' +
+      '<span class="badge ' + t.badge + '">' + esc(t.label.toUpperCase()) + '</span>' +
+      '<div class="main"><div class="t">' + esc(docTitle(d)) + '</div><div class="s">' + esc(docSub(d)) + '</div></div>' +
+      (docAmount(d) ? '<div class="amt">' + esc(docAmount(d)) + '</div>' : '') +
+      '<div class="row-btns">' +
+        '<button class="btn small" data-act="edit" data-id="' + d.id + '">Open</button>' +
+        '<button class="btn small" data-act="print" data-id="' + d.id + '">🖨 Print</button>' +
+        '<button class="btn small" data-act="dup" data-id="' + d.id + '">Duplicate</button>' +
+        '<button class="btn small danger" data-act="del" data-id="' + d.id + '">Delete</button>' +
+      '</div></div>';
+  }).join("");
+  list.querySelectorAll("button[data-act]").forEach(function(b){
+    b.addEventListener("click", function(){
+      var id = b.getAttribute("data-id"), act = b.getAttribute("data-act");
+      if(act === "edit") openEditor(null, id);
+      else if(act === "print") printDoc(id);
+      else if(act === "dup") duplicateDoc(id);
+      else if(act === "del") deleteDoc(id);
+    });
+  });
+}
+function statBox(n, l){ return '<div class="stat"><div class="n">' + esc(String(n)) + '</div><div class="l">' + esc(l) + '</div></div>'; }
+$("libSearch").addEventListener("input", renderLibrary);
+$("libFilter").addEventListener("change", renderLibrary);
+
+function deleteDoc(id){
+  var d = getDoc(id); if(!d) return;
+  if(!window.confirm("Delete this " + TYPES[d.type].label + " (" + docTitle(d) + ")? This cannot be undone.")) return;
+  state.docs = state.docs.filter(function(x){ return x.id !== id; });
+  saveState(); renderLibrary(); toast("Document deleted.");
+}
+function duplicateDoc(id){
+  var d = getDoc(id); if(!d) return;
+  var copy = JSON.parse(JSON.stringify(d));
+  copy.id = uid(); copy.demo = false;
+  copy.createdAt = Date.now(); copy.updatedAt = Date.now();
+  var dt = copy.data;
+  dt.date = todayISO();
+  if(copy.type === "co"){
+    dt.status = "pending";
+    dt.number = coNumberFor(state.docs, dt.jobName, null);
+    dt.sigCustomer = ""; dt.sigCustomerDate = ""; dt.sigCompany = ""; dt.sigCompanyDate = "";
+  }
+  if(copy.type === "punch"){
+    (dt.items || []).forEach(function(it){ it.status = "open"; });
+    dt.sigCustomer = ""; dt.sigCustomerDate = ""; dt.sigCompany = ""; dt.sigCompanyDate = "";
+  }
+  if(copy.type === "jsa"){ dt.crew = []; }
+  state.docs.push(copy); saveState(); renderLibrary();
+  toast("Duplicated as a fresh template — signatures cleared.");
+  openEditor(null, copy.id);
+}
+
+/* ---------------- backup / demo / company ---------------- */
+$("btnExport").addEventListener("click", function(){
+  var payload = JSON.stringify({app:"fieldforms-toolkit", version:1, exportedAt:new Date().toISOString(), state:state}, null, 2);
+  var blob = new Blob([payload], {type:"application/json"});
+  var a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "paperboots-backup-" + todayISO() + ".json";
+  document.body.appendChild(a); a.click();
+  setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); }, 400);
+  toast("Backup file downloaded.");
+});
+$("btnImport").addEventListener("click", function(){ $("importFile").click(); });
+$("importFile").addEventListener("change", function(ev){
+  var file = ev.target.files && ev.target.files[0];
+  ev.target.value = "";
+  if(!file) return;
+  var reader = new FileReader();
+  reader.onload = function(){
+    try{
+      var parsed = JSON.parse(String(reader.result || ""));
+      var s = parsed && parsed.state ? parsed.state : parsed;
+      if(!s || !Array.isArray(s.docs)) throw new Error("bad file");
+      if(!s.company || typeof s.company !== "object") s.company = blankCompany();
+      if(!window.confirm("Import this backup? It REPLACES all documents and company info currently in the app.")) return;
+      state = s; saveState(); renderBrand(); renderLibrary();
+      toast("Backup imported.");
+    }catch(e){ window.alert("That file could not be imported. Make sure it's a PaperBoots backup JSON file."); }
+  };
+  reader.onerror = function(){ window.alert("Could not read that file."); };
+  reader.readAsText(file);
+});
+$("btnClearDemo").addEventListener("click", function(){
+  var n = state.docs.filter(function(d){ return d.demo; }).length;
+  if(n === 0){ toast("No demo data in the app right now."); return; }
+  if(!window.confirm("Remove the " + n + " sample demo document(s)? Your own documents are not touched.")) return;
+  state.docs = state.docs.filter(function(d){ return !d.demo; });
+  saveState(); renderLibrary(); toast("Demo data cleared.");
+});
+function fillCompanyForm(){
+  var c = state.company;
+  $("cp_name").value = c.name || ""; $("cp_logo").value = c.logo || "";
+  $("cp_phone").value = c.phone || ""; $("cp_email").value = c.email || "";
+  $("cp_license").value = c.license || ""; $("cp_address").value = c.address || "";
+}
+$("btnSaveCompany").addEventListener("click", function(){
+  var name = $("cp_name").value.trim();
+  var msg = $("coMsg");
+  if(!name){ showMsg(msg, "Company name is required — it prints at the top of every document.", false); $("cp_name").focus(); return; }
+  state.company = {name:name, logo:$("cp_logo").value.trim(), phone:$("cp_phone").value.trim(),
+    email:$("cp_email").value.trim(), license:$("cp_license").value.trim(), address:$("cp_address").value.trim()};
+  saveState(); renderBrand();
+  showMsg(msg, "Company profile saved. It now appears on the header of every document.", true);
+  toast("Company profile saved.");
+});
+$("btnEraseAll").addEventListener("click", function(){
+  if(!window.confirm("Erase ALL data — company profile and every document? Export a backup first if you need one. This cannot be undone.")) return;
+  if(!window.confirm("Really erase everything?")) return;
+  state = freshState(false); saveState(); renderBrand(); fillCompanyForm(); showView("library");
+  toast("All data erased.");
+});
+
+/* ================================================================
+   EDITORS — one form per document type, built into #view-editor.
+   ================================================================ */
+var editing = null; // {type, id|null, punchItems:[], jsaHazards:[]}
+
+function editorShell(title, sub){
+  return '<div class="card"><h2>' + esc(title) + '</h2>' +
+    (sub ? '<p class="hint">' + esc(sub) + '</p>' : '') +
+    '<div id="edMsg" class="msg"></div>' +
+    '<div id="edBody"></div>' +
+    '<div class="form-actions">' +
+      '<button class="btn primary" id="edSave">💾 Save document</button>' +
+      '<button class="btn" id="edPrint" style="display:none">🖨 Print</button>' +
+      '<button class="btn" id="edCancel">← Back to library</button>' +
+    '</div></div>';
+}
+function fieldHtml(id, label, val, opts){
+  opts = opts || {};
+  var input;
+  if(opts.type === "textarea"){
+    input = '<textarea id="' + id + '" placeholder="' + esc(opts.ph || "") + '">' + esc(val || "") + '</textarea>';
+  } else if(opts.type === "select"){
+    input = '<select id="' + id + '">' + (opts.options || []).map(function(o){
+      return '<option value="' + esc(o.v) + '"' + (String(o.v) === String(val) ? " selected" : "") + '>' + esc(o.t) + '</option>';
+    }).join("") + '</select>';
+  } else {
+    input = '<input id="' + id + '" type="' + (opts.type || "text") + '" value="' + esc(val == null ? "" : val) + '" placeholder="' + esc(opts.ph || "") + '"' + (opts.step ? ' step="' + opts.step + '"' : "") + '>';
+  }
+  return '<div class="field' + (opts.full ? " full" : "") + '"><label class="f" for="' + id + '">' + esc(label) + '</label>' + input +
+    (opts.note ? '<div class="note">' + esc(opts.note) + '</div>' : '') + '</div>';
+}
+function baseFields(dt){
+  return '<div class="grid">' +
+    fieldHtml("f_job", "Job name *", dt.jobName, {ph:"e.g., Johnson Kitchen Remodel", note:"Use the exact same job name on every document for this job — totals and search group by it."}) +
+    fieldHtml("f_customer", "Customer", dt.customer, {ph:"e.g., Mark & Lisa Johnson"}) +
+    fieldHtml("f_date", "Date *", dt.date || todayISO(), {type:"date"}) +
+  '</div>';
+}
+function sigFields(dt){
+  return '<h3>Sign-off</h3><div class="grid">' +
+    fieldHtml("f_sigCustomer", "Customer signature (type name)", dt.sigCustomer, {ph:"Type full name"}) +
+    fieldHtml("f_sigCustomerDate", "Customer sign date", dt.sigCustomerDate, {type:"date"}) +
+    fieldHtml("f_sigCompany", "Company signature (type name)", dt.sigCompany, {ph:"Type full name"}) +
+    fieldHtml("f_sigCompanyDate", "Company sign date", dt.sigCompanyDate, {type:"date"}) +
+  '</div><p class="hint">Typed names print on the signature line in script style. Have the customer sign the printed sheet too if you want a wet signature on file.</p>';
+}
+function wireEditorShell(saveFn){
+  $("edCancel").addEventListener("click", function(){ showView("library"); });
+  $("edSave").addEventListener("click", saveFn);
+  if(editing && editing.id){
+    var p = $("edPrint");
+    p.style.display = "";
+    p.addEventListener("click", function(){ printDoc(editing.id); });
+  }
+}
+function readBase(){
+  return {jobName:$("f_job").value.trim(), customer:$("f_customer").value.trim(), date:$("f_date").value || todayISO()};
+}
+function readSigs(){
+  return {sigCustomer:$("f_sigCustomer").value.trim(), sigCustomerDate:$("f_sigCustomerDate").value,
+          sigCompany:$("f_sigCompany").value.trim(), sigCompanyDate:$("f_sigCompanyDate").value};
+}
+function validateBase(base){
+  var msg = $("edMsg");
+  if(!base.jobName){ showMsg(msg, "Job name is required.", false); $("f_job").focus(); return false; }
+  if(!base.date){ showMsg(msg, "Date is required.", false); $("f_date").focus(); return false; }
+  return true;
+}
+function commitDoc(type, data){
+  var now = Date.now();
+  if(editing.id){
+    var d = getDoc(editing.id); if(!d) return null;
+    d.data = data; d.updatedAt = now;
+    saveState();
+    showMsg($("edMsg"), "Saved. Changes are stored on this device.", true);
+    toast(TYPES[type].label + " saved.");
+    return d;
+  }
+  var nd = {id:uid(), type:type, demo:false, createdAt:now, updatedAt:now, data:data};
+  state.docs.push(nd); saveState();
+  editing.id = nd.id;
+  var p = $("edPrint"); if(p) p.style.display = "";
+  if(p) p.addEventListener("click", function(){ printDoc(nd.id); });
+  showMsg($("edMsg"), "Saved. Changes are stored on this device.", true);
+  toast(TYPES[type].label + " saved.");
+  return nd;
+}
+
+/* ---------- Change Order editor ---------- */
+function openCO(d){
+  var dt = d ? d.data : {jobName:"", customer:"", date:todayISO(), number:"", description:"", costImpact:"", scheduleImpact:0, status:"pending", notes:"", sigCustomer:"", sigCustomerDate:"", sigCompany:"", sigCompanyDate:""};
+  editing = {type:"co", id: d ? d.id : null};
+  $("view-editor").innerHTML = editorShell(d ? "Edit Change Order" : "New Change Order",
+    "Put the change in writing before the work happens — price, schedule impact, and the customer's approval, all on one sheet.");
+  var number = dt.number || coNumberFor(state.docs, dt.jobName || "", null);
+  $("edBody").innerHTML = baseFields(dt) +
+    '<div class="grid" style="margin-top:12px">' +
+      fieldHtml("f_number", "Change order #", number, {note:"Auto-numbered per job. You can override it."}) +
+      fieldHtml("f_status", "Approval status", dt.status || "pending", {type:"select", options:[
+        {v:"pending", t:"Pending — waiting on customer"}, {v:"approved", t:"Approved"}, {v:"rejected", t:"Rejected / not approved"}]}) +
+      fieldHtml("f_desc", "Description of change *", dt.description, {type:"textarea", full:true, ph:"What work is being added, removed or changed? Be specific — this is the legal record."}) +
+      fieldHtml("f_cost", "Cost impact ($)", dt.costImpact, {ph:"e.g., 1450 — use a negative number for a credit, e.g., -300", note:"Negative = money back to the customer."}) +
+      fieldHtml("f_sched", "Schedule impact (days)", dt.scheduleImpact, {type:"number", step:"1", ph:"e.g., 2 — negative shortens the job", note:"Days added to (or removed from) the completion date."}) +
+      fieldHtml("f_notes", "Notes", dt.notes, {type:"textarea", full:true, ph:"Verbal approvals, material choices, anything worth writing down"}) +
+    '</div>' +
+    '<div class="total-box" id="coTotals"></div>' +
+    sigFields(dt);
+  wireEditorShell(saveCO);
+  function refreshTotals(){
+    var job = $("f_job").value;
+    var t = coTotalsForJob(state.docs, job, editing.id);
+    var thisAmt = parseMoney($("f_cost").value);
+    var thisStatus = $("f_status").value;
+    var approvedAll = t.approved + (thisStatus === "approved" ? thisAmt : 0);
+    $("coTotals").innerHTML =
+      '<div class="row"><span>Previously approved change orders for this job (' + t.approvedCount + ')</span><span>' + fmtMoney(t.approved) + '</span></div>' +
+      '<div class="row"><span>This change order</span><span>' + fmtMoney(thisAmt) + (thisStatus === "approved" ? " (approved)" : thisStatus === "rejected" ? " (rejected — not counted)" : " (pending — not counted)") + '</span></div>' +
+      '<div class="row grand"><span>Running total — approved changes</span><span>' + fmtMoney(approvedAll) + '</span></div>' +
+      (t.pending ? '<div class="row"><span>Still pending approval (not counted above)</span><span>' + fmtMoney(t.pending) + '</span></div>' : '');
+  }
+  ["f_job","f_cost","f_status"].forEach(function(id){
+    $(id).addEventListener("input", refreshTotals);
+    $(id).addEventListener("change", refreshTotals);
+  });
+  /* Keep the auto number in sync with the job name until the user overrides it. */
+  editing.coNumTouched = !!d;
+  $("f_number").addEventListener("input", function(){ editing.coNumTouched = true; });
+  $("f_job").addEventListener("input", function(){
+    if(!editing.coNumTouched) $("f_number").value = coNumberFor(state.docs, $("f_job").value, editing.id);
+  });
+  refreshTotals();
+  showView("editor");
+}
+function saveCO(){
+  var base = readBase(); if(!validateBase(base)) return;
+  var desc = $("f_desc").value.trim();
+  if(!desc){ showMsg($("edMsg"), "Description of the change is required — it's the whole point of the document.", false); $("f_desc").focus(); return; }
+  var data = Object.assign(base, readSigs(), {
+    number: $("f_number").value.trim() || coNumberFor(state.docs, base.jobName, editing.id),
+    description: desc,
+    costImpact: parseMoney($("f_cost").value),
+    scheduleImpact: Math.round(parseMoney($("f_sched").value)),
+    status: $("f_status").value,
+    notes: $("f_notes").value.trim()
+  });
+  commitDoc("co", data);
+}
+
+/* ---------- Punch List editor ---------- */
+function openPunch(d){
+  var dt = d ? d.data : {jobName:"", customer:"", date:todayISO(), items:[], notes:"", sigCustomer:"", sigCustomerDate:"", sigCompany:"", sigCompanyDate:""};
+  editing = {type:"punch", id: d ? d.id : null,
+    punchItems: (dt.items || []).map(function(it){ return {area:it.area||"", description:it.description||"", status:it.status||"open", photoRef:it.photoRef||"", photo:it.photo||""}; })};
+  if(editing.punchItems.length === 0) editing.punchItems.push({area:"", description:"", status:"open", photoRef:"", photo:""});
+  $("view-editor").innerHTML = editorShell(d ? "Edit Punch List" : "New Punch List",
+    "The walk-through fix-it list, by room or area. Set each item Open → Done → Verified as it's closed out.");
+  $("edBody").innerHTML = baseFields(dt) +
+    '<h3>Items</h3>' +
+    '<div style="overflow-x:auto"><table class="items"><thead><tr>' +
+    '<th style="width:15%">Room / Area</th><th>Item to fix or finish</th><th style="width:13%">Photo ref</th><th>Photo</th><th style="width:13%">Status</th><th style="width:44px"></th>' +
+    '</tr></thead><tbody id="punchRows"></tbody></table></div>' +
+    '<div class="form-actions"><button class="btn" id="punchAdd" type="button">+ Add item</button></div>' +
+    '<div class="total-box"><div class="row"><span>Completion</span><span id="punchPct">0%</span></div>' +
+    '<div class="progress-wrap"><div class="progress-bar" id="punchBar"></div></div>' +
+    '<div class="row"><span id="punchCounts"></span><span></span></div></div>' +
+    '<div class="grid" style="margin-top:12px">' +
+      fieldHtml("f_notes", "Walk-through notes", dt.notes, {type:"textarea", full:true, ph:"Walk-through date/time, who attended, follow-ups"}) +
+    '</div>' + sigFields(dt);
+  wireEditorShell(savePunch);
+  renderPunchRows();
+  $("punchAdd").addEventListener("click", function(){
+    collectPunchRows();
+    editing.punchItems.push({area:"", description:"", status:"open", photoRef:"", photo:""});
+    renderPunchRows();
+  });
+  showView("editor");
+}
+function renderPunchRows(){
+  var tb = $("punchRows"); if(!tb) return;
+  tb.innerHTML = editing.punchItems.map(function(it, i){
+    return '<tr>' +
+      '<td><input data-pi="' + i + '" data-pf="area" value="' + esc(it.area) + '" placeholder="Kitchen"></td>' +
+      '<td><textarea data-pi="' + i + '" data-pf="description" placeholder="What needs fixing?">' + esc(it.description) + '</textarea></td>' +
+      '<td><input data-pi="' + i + '" data-pf="photoRef" value="' + esc(it.photoRef) + '" placeholder="IMG_0000"></td>' +
+      '<td class="punch-photo-cell">' +
+        (it.photo ? '<img class="punch-thumb" src="' + esc(it.photo) + '" alt="Photo for this punch item">' : '') +
+        '<label class="btn small punch-photo-btn">\uD83D\uDCF7 ' + (it.photo ? 'Replace' : 'Photo') + '<input type="file" accept="image/*" capture="environment" data-pphoto="' + i + '" style="display:none"></label>' +
+        (it.photo ? ' <button class="btn small danger" type="button" data-pphotodel="' + i + '">Remove photo</button>' : '') +
+      '</td>' +
+      '<td><select data-pi="' + i + '" data-pf="status">' +
+        ["open","done","verified"].map(function(s){ return '<option value="' + s + '"' + (it.status === s ? " selected" : "") + '>' + s.charAt(0).toUpperCase() + s.slice(1) + '</option>'; }).join("") +
+      '</select></td>' +
+      '<td><button class="btn small danger" type="button" data-pdel="' + i + '" title="Remove item">✕</button></td>' +
+    '</tr>';
+  }).join("");
+  tb.querySelectorAll("[data-pdel]").forEach(function(b){
+    b.addEventListener("click", function(){
+      collectPunchRows();
+      editing.punchItems.splice(parseInt(b.getAttribute("data-pdel"),10), 1);
+      if(editing.punchItems.length === 0) editing.punchItems.push({area:"", description:"", status:"open", photoRef:"", photo:""});
+      renderPunchRows();
+    });
+  });
+  tb.querySelectorAll("[data-pphoto]").forEach(function(inp){
+    inp.addEventListener("change", function(){
+      var idx = parseInt(inp.getAttribute("data-pphoto"), 10);
+      var file = inp.files && inp.files[0];
+      if(!file) return;
+      collectPunchRows();
+      compressPunchPhoto(file, function(url){
+        if(!url){ toast("That photo could not be read - try another one."); return; }
+        if(editing.punchItems[idx]) editing.punchItems[idx].photo = url;
+        renderPunchRows();
+        toast("Photo added - tap Save to keep it.");
+      });
+    });
+  });
+  tb.querySelectorAll("[data-pphotodel]").forEach(function(b){
+    b.addEventListener("click", function(){
+      collectPunchRows();
+      var idx = parseInt(b.getAttribute("data-pphotodel"), 10);
+      if(editing.punchItems[idx]) editing.punchItems[idx].photo = "";
+      renderPunchRows();
+      toast("Photo removed - tap Save to keep the change.");
+    });
+  });
+  tb.querySelectorAll("[data-pi]").forEach(function(inp){
+    inp.addEventListener("input", refreshPunchStats);
+    inp.addEventListener("change", refreshPunchStats);
+  });
+  refreshPunchStats();
+}
+function collectPunchRows(){
+  if(!editing || !editing.punchItems) return;
+  document.querySelectorAll("#punchRows [data-pi]").forEach(function(inp){
+    var i = parseInt(inp.getAttribute("data-pi"),10), f = inp.getAttribute("data-pf");
+    if(editing.punchItems[i]) editing.punchItems[i][f] = inp.value;
+  });
+}
+function refreshPunchStats(){
+  collectPunchRows();
+  var real = editing.punchItems.filter(function(it){ return (it.description || "").trim() !== "" || (it.area || "").trim() !== ""; });
+  var s = punchStats(real);
+  var pctEl = $("punchPct"), bar = $("punchBar"), cnt = $("punchCounts");
+  if(pctEl) pctEl.textContent = s.pct + "%";
+  if(bar) bar.style.width = s.pct + "%";
+  if(cnt) cnt.textContent = s.total === 0 ? "No items yet" : s.verified + " verified · " + s.done + " done · " + s.open + " open — of " + s.total + " items";
+}
+function savePunch(){
+  var base = readBase(); if(!validateBase(base)) return;
+  collectPunchRows();
+  var items = editing.punchItems.filter(function(it){ return (it.description || "").trim() !== "" || (it.area || "").trim() !== ""; });
+  if(items.length === 0){ showMsg($("edMsg"), "Add at least one punch item (an area or a description) before saving.", false); return; }
+  var data = Object.assign(base, readSigs(), {items:items, notes:$("f_notes").value.trim()});
+  commitDoc("punch", data);
+}
+
+/* ---------- Daily Log editor ---------- */
+function openLog(d){
+  var dt = d ? d.data : {jobName:"", customer:"", date:todayISO(), weather:"", crew:"", workPerformed:"", materials:"", delays:"", visitors:"", notes:"", loggedBy:""};
+  editing = {type:"log", id: d ? d.id : null};
+  $("view-editor").innerHTML = editorShell(d ? "Edit Daily Log" : "New Daily Log",
+    "Two minutes at the end of the day. These logs are what settle 'nobody told me' disputes months later.");
+  $("edBody").innerHTML = baseFields(dt) +
+    '<div class="grid" style="margin-top:12px">' +
+      fieldHtml("f_weather", "Weather", dt.weather, {ph:"e.g., Clear, 68°F, light wind — or 'Rain, rained out at 1 PM'"}) +
+      fieldHtml("f_loggedBy", "Logged by", dt.loggedBy, {ph:"Your name"}) +
+      fieldHtml("f_crew", "Crew on site", dt.crew, {type:"textarea", full:true, ph:"Who was on site and hours, e.g., 'Alex (lead), Chris — 7:30 AM–4:00 PM'"}) +
+      fieldHtml("f_work", "Work performed *", dt.workPerformed, {type:"textarea", full:true, ph:"What got done today, in plain order"}) +
+      fieldHtml("f_materials", "Materials delivered / used", dt.materials, {type:"textarea", full:true, ph:"Deliveries (with times), materials used, anything short or damaged"}) +
+      fieldHtml("f_delays", "Delays & issues", dt.delays, {type:"textarea", full:true, ph:"Weather, late deliveries, change requests, problems — and whose call it was"}) +
+      fieldHtml("f_visitors", "Visitors on site", dt.visitors, {type:"textarea", full:true, ph:"Homeowner, inspector, architect — what was discussed or approved"}) +
+      fieldHtml("f_notes", "Other notes", dt.notes, {type:"textarea", full:true, ph:"Anything else worth writing down"}) +
+    '</div>';
+  wireEditorShell(saveLog);
+  showView("editor");
+}
+function saveLog(){
+  var base = readBase(); if(!validateBase(base)) return;
+  var work = $("f_work").value.trim();
+  if(!work){ showMsg($("edMsg"), "Work performed is required — even 'No work today, rained out' counts; just write it.", false); $("f_work").focus(); return; }
+  var data = Object.assign(base, {
+    weather:$("f_weather").value.trim(), loggedBy:$("f_loggedBy").value.trim(), crew:$("f_crew").value.trim(),
+    workPerformed:work, materials:$("f_materials").value.trim(), delays:$("f_delays").value.trim(),
+    visitors:$("f_visitors").value.trim(), notes:$("f_notes").value.trim()
+  });
+  commitDoc("log", data);
+}
+
+/* ---------- JSA editor ---------- */
+function openJSA(d){
+  var dt = d ? d.data : {jobName:"", customer:"", date:todayISO(), task:"", location:"", hazards:[], crew:[], supervisor:""};
+  editing = {type:"jsa", id: d ? d.id : null,
+    jsaHazards: (dt.hazards || []).map(function(h){ return {name:h.name||"", controls:h.controls||"", ppe:h.ppe||""}; })};
+  $("view-editor").innerHTML = editorShell(d ? "Edit Safety Assessment" : "New Job Safety Assessment",
+    "Five minutes before the work starts: pick the hazards, write the controls, crew signs off by name.");
+  $("edBody").innerHTML = baseFields(dt) +
+    '<div class="grid" style="margin-top:12px">' +
+      fieldHtml("f_task", "Task being performed *", dt.task, {full:true, ph:"e.g., Roof tear-off and re-deck, north slope"}) +
+      fieldHtml("f_location", "Work location", dt.location, {full:true, ph:"Address / area of the site"}) +
+    '</div>' +
+    '<h3>1 — Check every hazard that applies</h3>' +
+    '<div class="haz-grid" id="hazGrid"></div>' +
+    '<div class="grid"><div class="field full"><label class="f" for="f_customHaz">Add a custom hazard</label>' +
+    '<div style="display:flex;gap:8px"><input id="f_customHaz" type="text" placeholder="e.g., Working near septic tank" style="flex:1;padding:10px 11px;border:1px solid var(--line);border-radius:8px;min-height:44px">' +
+    '<button class="btn" id="btnAddHaz" type="button">+ Add</button></div></div></div>' +
+    '<h3>2 — Controls & PPE for each hazard</h3><div id="hazRows"></div>' +
+    '<h3>3 — Crew sign-off</h3>' +
+    '<p class="hint">Type each crew member\'s name and tap Add — everyone on the task signs off that they heard the plan.</p>' +
+    '<div class="grid"><div class="field full"><label class="f" for="f_crewName">Crew member name</label>' +
+    '<div style="display:flex;gap:8px"><input id="f_crewName" type="text" placeholder="Full name" style="flex:1;padding:10px 11px;border:1px solid var(--line);border-radius:8px;min-height:44px">' +
+    '<button class="btn" id="btnAddCrew" type="button">+ Add</button></div></div></div>' +
+    '<div id="crewList" style="margin-top:8px"></div>' +
+    '<div class="grid" style="margin-top:12px">' +
+      fieldHtml("f_supervisor", "Supervisor / assessment by", dt.supervisor, {ph:"Name of person who ran the assessment"}) +
+    '</div>';
+  wireEditorShell(saveJSA);
+  renderHazGrid(); renderHazRows(); renderCrew(dt.crew || []);
+  $("btnAddHaz").addEventListener("click", function(){
+    var v = $("f_customHaz").value.trim(); if(!v) return;
+    collectHazRows();
+    if(!editing.jsaHazards.some(function(h){ return h.name.toLowerCase() === v.toLowerCase(); }))
+      editing.jsaHazards.push({name:v, controls:"", ppe:""});
+    $("f_customHaz").value = "";
+    renderHazGrid(); renderHazRows();
+  });
+  $("btnAddCrew").addEventListener("click", function(){
+    var v = $("f_crewName").value.trim(); if(!v) return;
+    editing.crew.push(v); $("f_crewName").value = ""; renderCrew();
+  });
+  showView("editor");
+}
+function hazTip(name){
+  var h = HAZARDS.find(function(x){ return x.name === name; });
+  return h ? h.tip : "";
+}
+function renderHazGrid(){
+  var g = $("hazGrid"); if(!g) return;
+  var customs = editing.jsaHazards.filter(function(h){ return !HAZARDS.some(function(x){ return x.name === h.name; }); });
+  var all = HAZARDS.map(function(h){ return h.name; }).concat(customs.map(function(h){ return h.name; }));
+  g.innerHTML = all.map(function(name){
+    var on = editing.jsaHazards.some(function(h){ return h.name === name; });
+    return '<label class="haz"><input type="checkbox" data-haz="' + esc(name) + '"' + (on ? " checked" : "") + '><span>' + esc(name) + '</span></label>';
+  }).join("");
+  g.querySelectorAll("[data-haz]").forEach(function(cb){
+    cb.addEventListener("change", function(){
+      collectHazRows();
+      var name = cb.getAttribute("data-haz");
+      if(cb.checked){
+        if(!editing.jsaHazards.some(function(h){ return h.name === name; }))
+          editing.jsaHazards.push({name:name, controls:"", ppe:""});
+      } else {
+        editing.jsaHazards = editing.jsaHazards.filter(function(h){ return h.name !== name; });
+      }
+      renderHazRows();
+    });
+  });
+}
+function renderHazRows(){
+  var wrap = $("hazRows"); if(!wrap) return;
+  if(editing.jsaHazards.length === 0){
+    wrap.innerHTML = '<div class="empty">No hazards checked yet — check at least one above.</div>';
+    return;
+  }
+  wrap.innerHTML = editing.jsaHazards.map(function(h, i){
+    var tip = hazTip(h.name);
+    return '<div class="card" style="padding:12px;margin-bottom:10px"><b>' + esc(h.name) + '</b>' +
+      (tip ? '<div class="hint" style="margin:2px 0 8px">Common controls: ' + esc(tip) + '</div>' : '') +
+      '<div class="grid">' +
+      '<div class="field"><label class="f">Controls — how we prevent the injury</label><textarea data-hi="' + i + '" data-hf="controls" placeholder="What will we actually do?">' + esc(h.controls) + '</textarea></div>' +
+      '<div class="field"><label class="f">PPE required</label><textarea data-hi="' + i + '" data-hf="ppe" placeholder="e.g., Safety glasses, gloves, harness">' + esc(h.ppe) + '</textarea></div>' +
+      '</div></div>';
+  }).join("");
+}
+function collectHazRows(){
+  if(!editing || !editing.jsaHazards) return;
+  document.querySelectorAll("#hazRows [data-hi]").forEach(function(inp){
+    var i = parseInt(inp.getAttribute("data-hi"),10), f = inp.getAttribute("data-hf");
+    if(editing.jsaHazards[i]) editing.jsaHazards[i][f] = inp.value;
+  });
+}
+function renderCrew(initial){
+  if(initial) editing.crew = initial.slice();
+  if(!editing.crew) editing.crew = [];
+  var el = $("crewList"); if(!el) return;
+  el.innerHTML = editing.crew.length === 0
+    ? '<p class="hint">No crew added yet.</p>'
+    : editing.crew.map(function(n, i){
+        return '<span style="display:inline-flex;align-items:center;gap:7px;border:1px solid var(--line);background:#fff;border-radius:16px;padding:6px 8px 6px 13px;margin:0 6px 6px 0;font-weight:600">' +
+          esc(n) + '<button class="btn small danger" type="button" data-crewdel="' + i + '">✕</button></span>';
+      }).join("");
+  el.querySelectorAll("[data-crewdel]").forEach(function(b){
+    b.addEventListener("click", function(){
+      editing.crew.splice(parseInt(b.getAttribute("data-crewdel"),10), 1);
+      renderCrew();
+    });
+  });
+}
+function saveJSA(){
+  var base = readBase(); if(!validateBase(base)) return;
+  var task = $("f_task").value.trim();
+  if(!task){ showMsg($("edMsg"), "Task is required — the assessment has to name the work.", false); $("f_task").focus(); return; }
+  collectHazRows();
+  if(editing.jsaHazards.length === 0){ showMsg($("edMsg"), "Check at least one hazard (or add a custom one) before saving.", false); return; }
+  var data = Object.assign(base, {
+    task:task, location:$("f_location").value.trim(),
+    hazards: editing.jsaHazards.map(function(h){ return {name:h.name, controls:(h.controls||"").trim(), ppe:(h.ppe||"").trim()}; }),
+    crew: (editing.crew || []).slice(), supervisor: $("f_supervisor").value.trim()
+  });
+  commitDoc("jsa", data);
+}
+
+/* ---------- dispatcher ---------- */
+function openEditor(type, id){
+  var d = id ? getDoc(id) : null;
+  var t = d ? d.type : type;
+  if(t === "co") openCO(d);
+  else if(t === "punch") openPunch(d);
+  else if(t === "log") openLog(d);
+  else if(t === "jsa") openJSA(d);
+}
+
+/* ================================================================
+   PRINTING — builds a clean branded sheet into #printSheet and
+   prints it. Screen app is hidden by print CSS.
+   ================================================================ */
+function pHead(typeLabel, docNo){
+  var c = state.company;
+  var sub = [];
+  if(c.address) sub.push(esc(c.address));
+  var line2 = [];
+  if(c.phone) line2.push(esc(c.phone));
+  if(c.email) line2.push(esc(c.email));
+  if(c.license) line2.push("License #: " + esc(c.license));
+  return '<div class="p-head"><div>' +
+    '<div class="p-logo">' + esc(c.logo || "PB") + '</div>' +
+    '<div class="p-co">' + esc(c.name || "PaperBoots") + '</div>' +
+    (sub.length ? '<div class="p-sub">' + sub.join(" · ") + '</div>' : '') +
+    (line2.length ? '<div class="p-sub">' + line2.join(" · ") + '</div>' : '') +
+    '</div><div class="p-title"><div class="doc-type">' + esc(typeLabel) + '</div>' +
+    '<h1>' + esc(docNo || "") + '</h1></div></div>';
+}
+function pKV(pairs){
+  return '<div class="kv">' + pairs.map(function(p){
+    return '<div><b>' + esc(p[0]) + ':</b> ' + esc(p[1] == null ? "" : p[1]) + '</div>';
+  }).join("") + '</div>';
+}
+function pPara(label, text){
+  if(!text) return "";
+  return '<h2>' + esc(label) + '</h2><div class="para">' + esc(text) + '</div>';
+}
+function pSig(label, name, date){
+  return '<div><div class="sig-line">' + (name ? '<span class="sig-name">' + esc(name) + '</span>' : '') + '</div>' +
+    '<div class="sig-cap">' + esc(label) + (date ? ' · Date: ' + esc(fmtDate(date)) : ' · Date: ____________') + '</div></div>';
+}
+function pSigBlock(dt, extraLines){
+  var out = '<div class="sig-grid">' +
+    pSig("Customer signature", dt.sigCustomer, dt.sigCustomerDate) +
+    pSig("Company signature", dt.sigCompany, dt.sigCompanyDate) + '</div>';
+  if(extraLines) out += extraLines;
+  return out + '<div class="foot">Generated with PaperBoots · ' + esc(state.company.name || "") + ' · Page 1 of 1</div>';
+}
+
+function sheetCO(d){
+  var dt = d.data;
+  var t = coTotalsForJob(state.docs, dt.jobName, null);
+  var sched = parseMoney(dt.scheduleImpact);
+  var schedTxt = sched === 0 ? "No change to schedule" : (sched > 0 ? "+" + sched + " day(s) added" : sched + " day(s) — shortens schedule");
+  return '<div class="sheet">' + pHead("Change Order", dt.number || "") +
+    pKV([["Job", dt.jobName], ["Customer", dt.customer], ["Date", fmtDate(dt.date)], ["Status", (dt.status || "pending").toUpperCase()]]) +
+    pPara("Description of change", dt.description) +
+    '<h2>Cost & schedule impact</h2><table><tr><th style="width:55%">Item</th><th>Amount</th></tr>' +
+    '<tr><td>This change order</td><td>' + fmtMoney(parseMoney(dt.costImpact)) + '</td></tr>' +
+    '<tr><td>Previously approved change orders for this job (' + t.approvedCount + ')</td><td>' + fmtMoney(t.approved - (dt.status === "approved" ? parseMoney(dt.costImpact) : 0)) + '</td></tr>' +
+    '<tr><td><b>Running total — all approved change orders</b></td><td><b>' + fmtMoney(t.approved) + '</b></td></tr>' +
+    '<tr><td>Schedule impact of this change</td><td>' + esc(schedTxt) + '</td></tr></table>' +
+    (dt.status !== "approved" ? '<p><b>Note:</b> This change order is currently marked <b>' + esc((dt.status || "pending").toUpperCase()) + '</b>. Only APPROVED change orders are counted in the running total above.</p>' : '') +
+    pPara("Notes", dt.notes) +
+    '<p>By signing below, the customer approves the change described above at the stated cost and schedule impact.</p>' +
+    pSigBlock(dt) + '</div>';
+}
+function sheetPunch(d){
+  var dt = d.data;
+  var s = punchStats(dt.items);
+  var rows = (dt.items || []).map(function(it, i){
+    var mark = it.status === "verified" ? "☑ Verified" : it.status === "done" ? "☑ Done" : "☐ Open";
+    var photoCell = (it.photo ? '<img class="p-photo" src="' + esc(it.photo) + '" alt="Photo for this punch item">' : '') + esc(it.photoRef || "");
+    return '<tr><td>' + (i+1) + '</td><td>' + esc(it.area) + '</td><td>' + esc(it.description) + '</td><td>' + photoCell + '</td><td>' + mark + '</td></tr>';
+  }).join("");
+  return '<div class="sheet">' + pHead("Punch List — Walk-Through Sheet", fmtDate(dt.date)) +
+    pKV([["Job", dt.jobName], ["Customer", dt.customer], ["Date", fmtDate(dt.date)], ["Completion", s.complete + " of " + s.total + " items (" + s.pct + "%)"]]) +
+    '<h2>Items</h2><table><tr><th style="width:5%">#</th><th style="width:16%">Room / Area</th><th>Item</th><th style="width:18%">Photo</th><th style="width:14%">Status</th></tr>' +
+    (rows || '<tr><td colspan="5">No items recorded.</td></tr>') + '</table>' +
+    pPara("Walk-through notes", dt.notes) +
+    '<p>Customer walk-through: by signing below, the customer confirms the items above are the complete list of outstanding items as of this date.</p>' +
+    pSigBlock(dt) + '</div>';
+}
+function sheetLog(d){
+  var dt = d.data;
+  return '<div class="sheet">' + pHead("Daily Log", fmtDate(dt.date)) +
+    pKV([["Job", dt.jobName], ["Customer", dt.customer], ["Date", fmtDate(dt.date)], ["Weather", dt.weather], ["Logged by", dt.loggedBy]]) +
+    pPara("Crew on site", dt.crew) +
+    pPara("Work performed", dt.workPerformed) +
+    pPara("Materials delivered / used", dt.materials) +
+    pPara("Delays & issues", dt.delays) +
+    pPara("Visitors on site", dt.visitors) +
+    pPara("Other notes", dt.notes) +
+    '<div class="foot">Generated with PaperBoots · ' + esc(state.company.name || "") + '</div></div>';
+}
+function sheetJSA(d){
+  var dt = d.data;
+  var rows = (dt.hazards || []).map(function(h){
+    return '<tr><td><b>' + esc(h.name) + '</b></td><td>' + esc(h.controls || "") + '</td><td>' + esc(h.ppe || "") + '</td></tr>';
+  }).join("");
+  var crew = (dt.crew || []).length
+    ? '<div class="sig-grid">' + dt.crew.map(function(n){ return pSig("Crew member signature", n, ""); }).join("") + '</div>'
+    : '<p>No crew sign-offs recorded.</p>';
+  return '<div class="sheet">' + pHead("Job Safety Assessment", fmtDate(dt.date)) +
+    pKV([["Job", dt.jobName], ["Customer", dt.customer], ["Date", fmtDate(dt.date)], ["Location", dt.location], ["Assessment by", dt.supervisor]]) +
+    pPara("Task being performed", dt.task) +
+    '<h2>Hazards, controls & PPE</h2><table><tr><th style="width:24%">Hazard</th><th>Controls</th><th style="width:26%">PPE required</th></tr>' +
+    (rows || '<tr><td colspan="3">No hazards recorded.</td></tr>') + '</table>' +
+    '<h2>Crew sign-off</h2><p>By signing, each crew member confirms they were present for this assessment and understand the hazards and controls for this task.</p>' +
+    crew +
+    '<div class="foot">Generated with PaperBoots · ' + esc(state.company.name || "") + '</div></div>';
+}
+function buildSheet(d){
+  if(d.type === "co") return sheetCO(d);
+  if(d.type === "punch") return sheetPunch(d);
+  if(d.type === "log") return sheetLog(d);
+  if(d.type === "jsa") return sheetJSA(d);
+  return "";
+}
+function printDoc(id){
+  var d = getDoc(id); if(!d) return;
+  $("printSheet").innerHTML = buildSheet(d);
+  window.print();
+}
+
+/* ---------------- init ---------------- */
+renderBrand();
+syncHelpEmail();
+fillCompanyForm();
+renderLibrary();
+
+/* Exposed for automated QA (harmless in the browser). */
+if(typeof module !== "undefined" && module.exports){
+  module.exports = {esc:esc, fmtMoney:fmtMoney, parseMoney:parseMoney, fmtDate:fmtDate, normJob:normJob,
+    coTotalsForJob:coTotalsForJob, coNumberFor:coNumberFor, punchStats:punchStats, HAZARDS:HAZARDS,
+    photoApproxBytes:photoApproxBytes, punchCanvasToJpeg:punchCanvasToJpeg, compressPunchPhoto:compressPunchPhoto};
+}
+</script>
+
+<style id="ww-legal-css">
+.ww-legal-overlay{position:fixed;inset:0;z-index:99990;background:rgba(10,12,14,.72);display:flex;align-items:center;justify-content:center;padding:14px;box-sizing:border-box}
+.ww-legal-card{background:#fff;color:#17202a;border-radius:14px;max-width:560px;width:100%;max-height:92vh;overflow:auto;padding:22px 20px;box-sizing:border-box;box-shadow:0 18px 50px rgba(0,0,0,.35);font-family:inherit}
+.ww-legal-card h2{margin:0 0 4px;font-size:22px}
+.ww-legal-card h3{margin:16px 0 6px}
+.ww-legal-sum{font-size:16px;line-height:1.45;margin:12px 0}
+.ww-legal-sum p{margin:6px 0;font-weight:600}
+.ww-legal-note{font-size:13px;color:#445; margin:10px 0}
+.ww-legal-updated{background:#fff3cd;border:1px solid #e3c565;border-radius:8px;padding:8px 10px;font-size:14px;margin:10px 0}
+.ww-legal-btn{display:block;width:100%;min-height:48px;margin:10px 0;padding:12px 14px;font-size:16px;border-radius:10px;border:1px solid #9db2c3;background:#eef4f8;color:#17202a;cursor:pointer;box-sizing:border-box}
+.ww-legal-agree{background:#17603a;border-color:#17603a;color:#fff;font-weight:700}
+.ww-legal-page{position:fixed;inset:0;z-index:99980;background:#fff;color:#17202a;overflow:auto;padding:18px 16px 40px;box-sizing:border-box}
+.ww-legal-page .ww-legal-inner{max-width:680px;margin:0 auto}
+.ww-legal-page h2{font-size:21px}.ww-legal-page h3{font-size:17px;margin-top:18px}.ww-legal-page p,.ww-legal-page li{font-size:14.5px;line-height:1.55}
+.ww-legal-close{min-height:48px;padding:10px 18px;font-size:15px;border-radius:10px;border:1px solid #9db2c3;background:#eef4f8;cursor:pointer}
+.ww-legal-open-btn{min-height:48px}
+.ww-legal-check{display:flex;gap:10px;align-items:flex-start;margin:12px 0;font-size:15px;line-height:1.4;cursor:pointer;text-align:left}
+.ww-legal-check input{width:22px;height:22px;min-width:22px;margin-top:1px;cursor:pointer}
+.ww-legal-agree[disabled]{opacity:.45;cursor:not-allowed}
+[hidden]{display:none !important}
+</style>
+
+<div id="wwLegalOverlay" class="ww-legal-overlay" hidden>
+  <div class="ww-legal-card" role="dialog" aria-modal="true" aria-labelledby="wwLegalTitle">
+    <h2>PaperBoots</h2>
+    <h3 id="wwLegalTitle" style="margin-top:2px">Terms of Use</h3>
+    <div id="wwLegalUpdated" class="ww-legal-updated" hidden>Our terms were updated (v1.0).</div>
+    <div class="ww-legal-sum">
+      <p>Your data stays on your device.</p>
+      <p>Estimates are aids, not guarantees.</p>
+      <p>You're responsible for checking outputs before you rely on them.</p>
+    </div>
+    <p class="ww-legal-note">The full Terms and Disclaimer are one tap away, now and any time in Settings → Legal.</p>
+    <button type="button" class="ww-legal-btn" id="wwLegalReadTerms">Read the full Terms</button>
+    
+    <label class="ww-legal-check" for="wwLegalCheck"><input type="checkbox" id="wwLegalCheck"><span>I have read and I agree to the Terms of Use</span></label>
+    <button type="button" class="ww-legal-btn ww-legal-agree" id="wwLegalAgree" disabled>I Agree</button>
+  </div>
+</div>
+<div id="wwLegalReader" class="ww-legal-page" hidden>
+  <div class="ww-legal-inner">
+    <button type="button" class="ww-legal-close" id="wwLegalReaderBack">← Back</button>
+    <div id="wwLegalReaderBody"></div>
+  </div>
+</div>
+<div id="wwLegalPage" class="ww-legal-page" hidden>
+  <div class="ww-legal-inner">
+    <button type="button" class="ww-legal-close" id="wwLegalPageClose">← Back</button>
+    <h2>Legal</h2>
+    <h3>Terms of Use</h3>
+    <div id="wwLegalTermsText"><h2>Terms of Use — White Wolf Digital Apps</h2>
+<p><strong>Version 1.0</strong></p>
+<p><strong>Seller: White Wolf Tree Service LLC, selling digital products under the name &quot;White Wolf Digital&quot;</strong></p>
+<p><strong>Contact: whitewolfbackoffice@gmail.com</strong></p>
+<hr>
+<h3>1. What you&#x27;re buying</h3>
+<p>Our apps (including ForgeFit AI, ForgeKitchen, TreeBid Pro, SnowBid,</p>
+<p>WashPrice Pro, RoofSquares, JobProfit Tracker, PastureLedger, and the other</p>
+<p>titles sold under White Wolf Digital) are single-file software tools. When</p>
+<p>you buy one, you are buying a <strong>license to use the file</strong>, not ownership of</p>
+<p>the software itself.</p>
+<h3>2. Your license</h3>
+<ul>
+<li>You may use the app for your own personal or business work.</li>
+<li>You may open it on your own devices (phone, tablet, computer) and move your</li>
+</ul>
+<p>  own data between them using the app&#x27;s built-in backup/export tools.</p>
+<ul>
+<li>You may <strong>not</strong> resell, redistribute, give away, upload, or share the app</li>
+</ul>
+<p>  file (or a copy of it) with anyone else — including posting it online,</p>
+<p>  bundling it with other products, or selling access to it.</p>
+<ul>
+<li>You may <strong>not</strong> claim the app as your own work, remove its branding or</li>
+</ul>
+<p>  notices, or use it to build a competing product for resale.</p>
+<ul>
+<li>One purchase = one buyer. A business purchase covers the buyer and their</li>
+</ul>
+<p>  own employees using it for that business&#x27;s work; it does not cover other</p>
+<p>  businesses.</p>
+<h3>3. Your data stays yours — and stays on your device</h3>
+<ul>
+<li>The current versions of our apps run <strong>entirely on your device</strong>. They have</li>
+</ul>
+<p>  no accounts, no sign-in, no analytics, and they collect, transmit, and store</p>
+<p>  <strong>none</strong> of your information on any server. We never see your data.</p>
+<ul>
+<li>Your records are stored in your browser/app storage on your device. **You</li>
+</ul>
+<p>  are responsible for backing them up** using the app&#x27;s export tools. If you</p>
+<p>  clear your browser data, lose your device, or uninstall the app, your</p>
+<p>  records may be permanently lost, and we cannot recover them — we never had</p>
+<p>  a copy.</p>
+<ul>
+<li>Files you export (backups, quotes, PDFs) are under your control. Where you</li>
+</ul>
+<p>  store or send them is up to you.</p>
+<h3>4. Estimates are tools, not guarantees</h3>
+<p>Every number our apps produce — bids, prices, costs, calorie targets,</p>
+<p>projections, schedules, totals — is an **estimate generated from the</p>
+<p>information you enter and the settings you choose**. Outputs are aids for</p>
+<p>your own judgment, not guarantees of price, profit, outcome, or result. You</p>
+<p>are responsible for checking any output before relying on it (see also the</p>
+<p>disclaimer that applies to your app: Health Disclaimer for fitness/nutrition</p>
+<p>apps, Estimator Disclaimer for contractor tools). If an input is wrong, the</p>
+<p>output will be wrong.</p>
+<h3>5. Acceptable use</h3>
+<p>Don&#x27;t use the apps to break the law, infringe anyone&#x27;s rights, or</p>
+<p>misrepresent quotes, invoices, or records to your own customers. For the</p>
+<p>fitness apps, the guardrails in the app (healthy-rate limits, calorie floor)</p>
+<p>are part of the product — don&#x27;t treat the app as a way around them.</p>
+<h3>6. Provided &quot;as is&quot;</h3>
+<p>The apps are provided **&quot;as is&quot; and &quot;as available,&quot; without warranties of</p>
+<p>any kind**, express or implied — including merchantability, fitness for a</p>
+<p>particular purpose, accuracy of calculations, and uninterrupted or</p>
+<p>error-free operation — to the maximum extent allowed by law. Software has</p>
+<p>bugs; browsers change; we work to fix problems but do not promise any app is</p>
+<p>error-free or will work on every device or browser forever.</p>
+<h3>7. Limitation of liability</h3>
+<p>To the maximum extent allowed by law:</p>
+<ul>
+<li>We are **not liable for indirect, incidental, special, or consequential</li>
+</ul>
+<p>  damages** — including lost profits, lost or mispriced jobs, lost data, or</p>
+<p>  business interruption — arising from use of the apps.</p>
+<ul>
+<li>Our total liability for any claim connected to an app is limited to the</li>
+</ul>
+<p>  <strong>amount you paid for that app</strong>.</p>
+<ul>
+<li>Nothing in these terms limits liability that cannot legally be limited.</li>
+</ul>
+<h3>8. Refunds</h3>
+<p>Refunds are handled **by the storefront you bought from, under that</p>
+<p>storefront&#x27;s policy** — Gumroad&#x27;s refund policy for Gumroad purchases, and</p>
+<p>Google Play&#x27;s refund policy for Play purchases. These terms do not add to,</p>
+<p>replace, or override the storefront&#x27;s refund rules. If a file is defective</p>
+<p>and won&#x27;t open, contact us at whitewolfbackoffice@gmail.com and we&#x27;ll fix or</p>
+<p>replace the file.</p>
+<h3>9. Updates and changes to these terms</h3>
+<ul>
+<li>We may release updated versions of an app. Updates may add, change, or</li>
+</ul>
+<p>  remove features.</p>
+<ul>
+<li>We may update these terms. The version you agreed to is recorded in the</li>
+</ul>
+<p>  app (version number and date) at first-run acceptance. If terms change,</p>
+<p>  the app may ask you to accept the new version once on next open. Updated</p>
+<p>  terms apply going forward, not retroactively.</p>
+<ul>
+<li>If you don&#x27;t agree to an updated version of the terms, stop using the app.</li>
+</ul>
+<h3>10. Governing law</h3>
+<p>These terms are governed by the laws of the <strong>State of Oklahoma</strong>, USA.</p>
+<p>(Attorney to confirm governing law and venue before publication.)</p>
+<h3>11. Contact</h3>
+<p>White Wolf Tree Service LLC (White Wolf Digital) —</p>
+<p>whitewolfbackoffice@gmail.com.</p>
+<hr>
+<h3>CONNECTED FEATURES — takes effect only when these features ship</h3>
+<p>*The sections below apply only to future connected features (device sync via</p>
+<p>Health Connect, AI voice logging, and the AI Goal Preview in ForgeFit). They</p>
+<p>do not apply to the current offline versions, which never transmit data.*</p>
+<ul>
+<li><strong>Opt-in only.</strong> Connected features are off by default. Each one asks for</li>
+</ul>
+<p>  your separate, explicit consent — on its own consent screen, in plain</p>
+<p>  language — before anything leaves your device. Declining never disables</p>
+<p>  the app&#x27;s offline features.</p>
+<ul>
+<li><strong>What gets sent.</strong> Only what the consent screen names, only when you use</li>
+</ul>
+<p>  the feature: for example, a meal description (text, or audio only if cloud</p>
+<p>  transcription is on) for AI voice logging, or the single photo you choose</p>
+<p>  for an AI Goal Preview.</p>
+<ul>
+<li><strong>No retention by us.</strong> Our relay service passes your request to the named</li>
+</ul>
+<p>  AI provider and keeps nothing — no copies of your photos, audio,</p>
+<p>  transcripts, or entries are stored on our servers. Provider handling is</p>
+<p>  described on the consent screen and in the Privacy Policy.</p>
+<ul>
+<li><strong>Health data stays on the device.</strong> Device sync (Health Connect) reads</li>
+</ul>
+<p>  your health data on your phone and stores it in the app on your phone. It</p>
+<p>  is not uploaded to us.</p>
+<ul>
+<li><strong>Allowances.</strong> Some connected features run on third-party AI services we</li>
+</ul>
+<p>  pay for per use, so they may include a monthly allowance described in the</p>
+<p>  app (for example, a set number of AI previews or voice entries per month),</p>
+<p>  with optional additional credits. Allowances and pricing will be shown in</p>
+<p>  the app before you use the feature; they are not a subscription unless the</p>
+<p>  app says so in plain words.</p>
+<ul>
+<li><strong>Permissions.</strong> Connected features may request device permissions (such</li>
+</ul>
+<p>  as Health Connect access or the microphone) at the moment you first use</p>
+<p>  them. You can revoke permissions any time in your device settings; the</p>
+<p>  related feature will simply stop working.</p></div>
+    
+    <h3>Privacy</h3>
+    <p>This app has no accounts and collects no data. Everything you enter is stored only on this device, in this browser's local storage. Nothing is uploaded, tracked, or shared. Exported backup files are under your control — where you store or send them is up to you. If you clear your browser data, lose your device, or uninstall the app, your records may be permanently lost, so keep backups using the app's export tools.</p>
+    <p id="wwLegalAcceptLine"></p>
+    <p><strong>Sold by White Wolf Tree Service LLC (White Wolf Digital) — whitewolfbackoffice@gmail.com</strong></p>
+  </div>
+</div>
+
+<script>
+/* White Wolf Digital — in-app legal pattern v1 (Terms acceptance + Settings > Legal) */
+const TERMS_VERSION = "1.0";
+(function(){
+  var WW_KEY = "fieldforms_v1";
+  var WW_SAVE = "saveState";
+  var WW_DISC = false;
+  function wwRaw(){ try{ var r = localStorage.getItem(WW_KEY); return r ? JSON.parse(r) : null; }catch(e){ return null; } }
+  function wwStateObj(){ try{ if(typeof state !== "undefined" && state && typeof state === "object") return state; }catch(e){} return null; }
+  function wwGetLegal(){
+    var st = wwStateObj(); if(st && st.legal && typeof st.legal === "object") return st.legal;
+    var r = wwRaw(); if(r && r.legal && typeof r.legal === "object") return r.legal;
+    return null;
+  }
+  function wwPersist(rec){
+    var st = wwStateObj();
+    if(st){ st.legal = rec;
+      try{ if(WW_SAVE === "saveState" && typeof saveState === "function"){ saveState(); return; } }catch(e){}
+      try{ if(WW_SAVE === "save" && typeof save === "function"){ save(); return; } }catch(e){}
+    }
+    try{ var r = wwRaw() || {}; r.legal = rec; localStorage.setItem(WW_KEY, JSON.stringify(r)); }catch(e){}
+  }
+  function wwAcceptLine(){
+    var el = document.getElementById("wwLegalAcceptLine"); if(!el) return;
+    var rec = wwGetLegal();
+    if(rec && rec.acceptedDate) el.textContent = "You agreed to Terms v" + (rec.termsVersion || TERMS_VERSION) + " on " + rec.acceptedDate + ".";
+    else el.textContent = "No acceptance recorded yet on this device.";
+  }
+  function wwShowReader(which){
+    var body = document.getElementById("wwLegalReaderBody");
+    var src = document.getElementById(which === "disc" ? "wwLegalDiscText" : "wwLegalTermsText");
+    if(!body || !src) return;
+    body.innerHTML = src.innerHTML;
+    document.getElementById("wwLegalReader").hidden = false;
+  }
+  function wwOpenLegal(){ wwAcceptLine(); document.getElementById("wwLegalPage").hidden = false; }
+  window.__wwOpenLegal = wwOpenLegal;
+  document.addEventListener("click", function(ev){
+    var t = ev.target && ev.target.closest ? ev.target.closest("[data-ww-legal]") : null;
+    if(t){ ev.preventDefault(); wwOpenLegal(); }
+  });
+  var agreeBtn = document.getElementById("wwLegalAgree");
+  var wwCheck = document.getElementById("wwLegalCheck");
+  function wwGate(){ if(agreeBtn && wwCheck) agreeBtn.disabled = !wwCheck.checked; }
+  if(wwCheck) wwCheck.addEventListener("change", wwGate);
+  wwGate();
+  if(agreeBtn) agreeBtn.addEventListener("click", function(){
+    if(wwCheck && !wwCheck.checked){ wwGate(); return; }
+    var rec = { termsVersion: TERMS_VERSION, acceptedDate: new Date().toISOString().slice(0,10), disclaimerShown: WW_DISC };
+    wwPersist(rec);
+    document.getElementById("wwLegalOverlay").hidden = true;
+    wwAcceptLine();
+  });
+  var rt = document.getElementById("wwLegalReadTerms");
+  if(rt) rt.addEventListener("click", function(){ wwShowReader("terms"); });
+  var rd = document.getElementById("wwLegalReadDisc");
+  if(rd) rd.addEventListener("click", function(){ wwShowReader("disc"); });
+  var rb = document.getElementById("wwLegalReaderBack");
+  if(rb) rb.addEventListener("click", function(){ document.getElementById("wwLegalReader").hidden = true; });
+  var pc = document.getElementById("wwLegalPageClose");
+  if(pc) pc.addEventListener("click", function(){ document.getElementById("wwLegalPage").hidden = true; });
+  var rec = wwGetLegal();
+  if(rec && rec.termsVersion === TERMS_VERSION){
+    var st2 = wwStateObj();
+    if(st2 && !st2.legal) wwPersist(rec);
+    wwAcceptLine();
+  } else {
+    if(rec && rec.termsVersion){ var u = document.getElementById("wwLegalUpdated"); if(u) u.hidden = false; }
+    document.getElementById("wwLegalOverlay").hidden = false;
+  }
+})();
+</script>
+
+<script>
+/* ============================================================================
+   SHARED VOICE DICTATION LAYER — "vv" snippet v1.0 (2026-10-29)
+   Governing standard: QA-STANDARD.md §9a (mic dictation on every data-entry
+   field). Built once, dropped into every catalog app verbatim. Do not fork
+   per app — fix here and re-drop.
+
+   What it does:
+   - Adds a >=48px mic button beside every text input, number input, and
+     textarea (an <input> with no type attribute counts as text). Selects,
+     checkboxes, radios, file/date/tel/email inputs are NOT wired — they keep
+     their native pickers/keyboards (per voice-retrofit-plan.md counting).
+   - Tap the mic -> Web Speech API dictation into that field, exactly as if
+     typed. Interim words show live in the field; nothing auto-submits.
+   - Number fields: spoken numbers are converted ("sixty five" -> 65,
+     "two point five" -> 2.5, "1,200" -> 1200). If the words can't be read as
+     a number, the field is left untouched and the user is told plainly.
+   - After a successful dictation the field receives real bubbling "input"
+     and "change" events, so the host app's own handlers fire exactly as if
+     the user typed.
+   - Fields added later (re-renders, add-row buttons) are wired automatically
+     via MutationObserver.
+   - No SpeechRecognition (Firefox, file:// copies in most browsers, denied
+     permission): the mic shows the honest note "Voice isn't available on
+     this device/browser — typing works as always" and typing is never
+     blocked, hidden, or degraded.
+   - Failed/empty recognition announces "Didn't catch that — try again or
+     type it" and restores the field's previous value.
+
+   Wiring (see README.md in this folder): paste this whole IIFE in a <script>
+   block just before </body>. It injects its own styles (#vv-style) — no
+   other changes needed. It never touches storage, prices, or app state.
+   ============================================================================ */
+(function () {
+  "use strict";
+  if (window.__vvDictation) return; // drop-in twice = wire once
+  window.__vvDictation = "1.0";
+
+  var SR = window.SpeechRecognition || window.webkitSpeechRecognition || null;
+  var FALLBACK_MSG = "Voice isn't available on this device/browser — typing works as always";
+  var MISSED_MSG = "Didn't catch that — try again or type it";
+  var BLOCKED_MSG = "Microphone is blocked — typing works as always. Check the browser's mic permission if you want voice.";
+
+  /* ---- styles (self-injected; dictation-snippet.css holds the same rules) ---- */
+  var CSS = [
+    ".vv-wrap{display:flex;gap:6px;align-items:flex-start}",
+    ".vv-wrap>input,.vv-wrap>textarea{flex:1 1 0;min-width:0}",
+    ".vv-mic{flex:0 0 auto;width:48px;min-width:48px;height:48px;border-radius:8px;border:1px solid #b9c2ba;background:#fff;font-size:20px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;-webkit-tap-highlight-color:transparent}",
+    ".vv-mic:active{transform:scale(.96)}",
+    ".vv-mic.vv-live{background:#b3372e;border-color:#b3372e;animation:vvpulse 1s ease-in-out infinite}",
+    "@keyframes vvpulse{0%,100%{opacity:1}50%{opacity:.5}}",
+    ".vv-status{position:fixed;left:50%;bottom:14px;transform:translateX(-50%);max-width:min(92vw,480px);background:#1c2420;color:#fff;padding:10px 14px;border-radius:9px;font-size:14px;line-height:1.35;z-index:99999;box-shadow:0 4px 18px rgba(0,0,0,.25);display:none;text-align:center;pointer-events:none}",
+    ".vv-status.vv-show{display:block}",
+    "@media print{.vv-mic{display:none!important}.vv-status{display:none!important}}"
+  ].join("\n");
+  if (!document.getElementById("vv-style")) {
+    var st = document.createElement("style");
+    st.id = "vv-style"; st.textContent = CSS;
+    (document.head || document.documentElement).appendChild(st);
+  }
+
+  /* ---- status announcements ---- */
+  var statusEl = null, statusTimer = null;
+  function say(msg, ms) {
+    if (!statusEl) {
+      statusEl = document.createElement("div");
+      statusEl.className = "vv-status"; statusEl.setAttribute("role", "status");
+      statusEl.setAttribute("aria-live", "polite");
+      document.body.appendChild(statusEl);
+    }
+    statusEl.textContent = msg;
+    statusEl.classList.add("vv-show");
+    if (statusTimer) clearTimeout(statusTimer);
+    statusTimer = setTimeout(function () { statusEl.classList.remove("vv-show"); }, ms || 5000);
+  }
+
+  /* ---- spoken-number conversion ---- */
+  var ONES = { zero: 0, one: 1, two: 2, three: 3, four: 4, five: 5, six: 6, seven: 7, eight: 8, nine: 9, ten: 10, eleven: 11, twelve: 12, thirteen: 13, fourteen: 14, fifteen: 15, sixteen: 16, seventeen: 17, eighteen: 18, nineteen: 19 };
+  var TENS = { twenty: 20, thirty: 30, forty: 40, fifty: 50, sixty: 60, seventy: 70, eighty: 80, ninety: 90 };
+  function wordsToNumber(s) {
+    var words = s.split(/[\s-]+/), total = 0, current = 0, seen = false, decimal = null, decPlace = 0.1, neg = false;
+    for (var i = 0; i < words.length; i++) {
+      var w = words[i];
+      if (!w || w === "and") continue;
+      if (w === "minus" || w === "negative") { neg = true; continue; }
+      if (w === "point") { decimal = true; continue; }
+      if (decimal) {
+        if (ONES.hasOwnProperty(w) && ONES[w] < 10) { if (decimal === true) decimal = 0; decimal += ONES[w] * decPlace; decPlace /= 10; seen = true; }
+        continue;
+      }
+      if (ONES.hasOwnProperty(w)) { current += ONES[w]; seen = true; }
+      else if (TENS.hasOwnProperty(w)) { current += TENS[w]; seen = true; }
+      else if (w === "hundred") { current = (current || 1) * 100; seen = true; }
+      else if (w === "thousand") { total += (current || 1) * 1000; current = 0; seen = true; }
+      else if (w === "million") { total += (current || 1) * 1000000; current = 0; seen = true; }
+      else if (w === "a" || w === "an") { /* filler before hundred/thousand */ }
+      /* any other word (dollars, feet, hours…) is ignored filler */
+    }
+    if (!seen) return null;
+    var n = total + current + (decimal ? decimal : 0);
+    return neg ? -n : n;
+  }
+  function parseSpokenNumber(raw) {
+    if (!raw) return null;
+    var s = String(raw).toLowerCase().replace(/\$/g, " ").replace(/\s+/g, " ").trim();
+    s = s.replace(/(\d),(?=\d)/g, "$1").replace(/,/g, " "); // 1,200 -> 1200
+    var m = s.match(/-?\d+(?:\.\d+)?/);
+    if (m) { var n = parseFloat(m[0]); if (isFinite(n)) return n; }
+    return wordsToNumber(s);
+  }
+
+  /* ---- field helpers ---- */
+  function isWirable(f) {
+    if (!f || f.dataset.vvWired) return false;
+    if (f.tagName === "TEXTAREA") return !(f.disabled || f.readOnly);
+    if (f.tagName !== "INPUT") return false;
+    var t = (f.getAttribute("type") || "text").toLowerCase();
+    if (t !== "text" && t !== "number") return false;
+    return !(f.disabled || f.readOnly);
+  }
+  function labelFor(f) {
+    var name = "";
+    if (f.id) {
+      var lab = document.querySelector('label[for="' + f.id + '"]');
+      if (lab) name = lab.textContent;
+    }
+    if (!name) {
+      var prev = f.closest ? f.closest("div") : null;
+      var l2 = prev ? prev.querySelector("label") : null;
+      if (l2) name = l2.textContent;
+    }
+    if (!name) name = f.getAttribute("placeholder") || f.getAttribute("name") || "field";
+    return String(name).replace(/\s+/g, " ").trim().slice(0, 60) || "field";
+  }
+  function fireEvents(f) {
+    ["input", "change"].forEach(function (type) {
+      var ev;
+      try { ev = new Event(type, { bubbles: true, composed: true }); }
+      catch (e) { ev = document.createEvent("Event"); ev.initEvent(type, true, true); }
+      f.dispatchEvent(ev);
+    });
+  }
+  function joinText(base, add) {
+    if (!base) return add;
+    if (!add) return base;
+    return base + (/\s$/.test(base) ? "" : " ") + add;
+  }
+
+  /* ---- dictation session ---- */
+  var active = null; // { rec, field, btn, base, finalText, gotResult, done }
+  function stopActive() { if (active && active.rec) { try { active.rec.stop(); } catch (e) {} } }
+  function startDictation(field, btn) {
+    if (active && active.field === field) { stopActive(); return; } // tap again = stop
+    if (active) stopActive();
+    if (!SR) { say(FALLBACK_MSG, 6000); return; }
+    var rec;
+    try { rec = new SR(); } catch (e) { say(FALLBACK_MSG, 6000); return; }
+    var session = { rec: rec, field: field, btn: btn, base: field.value || "", finalText: "", gotResult: false, done: false };
+    active = session;
+    rec.lang = (document.documentElement.getAttribute("lang") || "en-US");
+    rec.interimResults = true;
+    rec.continuous = false;
+    rec.maxAlternatives = 1;
+    btn.classList.add("vv-live");
+    btn.setAttribute("aria-label", "Listening — tap to stop");
+    say("Listening… speak now.");
+    rec.onresult = function (ev) {
+      var interim = "", finalT = "";
+      for (var i = ev.resultIndex; i < ev.results.length; i++) {
+        var r = ev.results[i];
+        if (r.isFinal) finalT += r[0].transcript; else interim += r[0].transcript;
+      }
+      if (finalT) { session.finalText = joinText(session.finalText, finalT.trim()); session.gotResult = true; }
+      var shown = joinText(session.finalText, interim.trim());
+      if (field.type !== "number") field.value = joinText(session.base, shown);
+      else if (shown) field.value = shown; // numbers: show the words until they resolve on end
+    };
+    rec.onerror = function (ev) {
+      if (session.done) return;
+      session.done = true;
+      field.value = session.base;
+      cleanup(session);
+      if (ev && (ev.error === "not-allowed" || ev.error === "service-not-allowed")) say(BLOCKED_MSG, 6500);
+      else if (ev && ev.error === "not-supported") say(FALLBACK_MSG, 6000);
+      else say(MISSED_MSG, 5000);
+    };
+    rec.onend = function () {
+      if (session.done) return;
+      session.done = true;
+      cleanup(session);
+      var heard = (session.finalText || "").trim();
+      if (!heard) { field.value = session.base; say(MISSED_MSG, 5000); return; }
+      if (field.type === "number") {
+        var n = parseSpokenNumber(heard);
+        if (n === null || !isFinite(n)) { field.value = session.base; say(MISSED_MSG, 5000); return; }
+        field.value = String(n);
+      } else {
+        field.value = joinText(session.base, heard);
+      }
+      fireEvents(field);
+      try { field.focus({ preventScroll: false }); } catch (e) {}
+      say("Added: " + heard, 3000);
+    };
+    try { rec.start(); } catch (e) { session.done = true; cleanup(session); field.value = session.base; say(MISSED_MSG, 5000); }
+  }
+  function cleanup(session) {
+    if (active === session) active = null;
+    if (session.btn) { session.btn.classList.remove("vv-live"); session.btn.setAttribute("aria-label", session.btn.dataset.vvLabel || "Voice entry"); }
+  }
+
+  /* ---- wiring ---- */
+  function wireField(f) {
+    if (!isWirable(f)) return;
+    f.dataset.vvWired = "1";
+    var wrap = document.createElement("span");
+    wrap.className = "vv-wrap";
+    f.parentNode.insertBefore(wrap, f);
+    wrap.appendChild(f);
+    var btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "vv-mic";
+    btn.innerHTML = "🎤";
+    var lab = "Voice entry for " + labelFor(f);
+    btn.dataset.vvLabel = lab;
+    btn.setAttribute("aria-label", lab);
+    btn.title = "Voice entry";
+    btn.addEventListener("click", function () { startDictation(f, btn); });
+    wrap.appendChild(btn);
+  }
+  function scan(root) {
+    if (!root || !root.querySelectorAll) return;
+    var fields = root.querySelectorAll("input, textarea");
+    for (var i = 0; i < fields.length; i++) wireField(fields[i]);
+    if (root.tagName && (root.tagName === "INPUT" || root.tagName === "TEXTAREA")) wireField(root);
+  }
+
+  function init() {
+    scan(document);
+    if (window.MutationObserver && document.body) {
+      var pending = false;
+      var obs = new MutationObserver(function (muts) {
+        var hasAdds = false;
+        for (var i = 0; i < muts.length; i++) if (muts[i].addedNodes.length) { hasAdds = true; break; }
+        if (!hasAdds || pending) return;
+        pending = true;
+        setTimeout(function () { pending = false; scan(document); }, 60);
+      });
+      obs.observe(document.body, { childList: true, subtree: true });
+    }
+  }
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init);
+  else init();
+
+  /* exposed for QA harnesses and future Tell flows */
+  window.__vv = { version: "1.0", supported: !!SR, parseSpokenNumber: parseSpokenNumber, fallbackMessage: FALLBACK_MSG, missedMessage: MISSED_MSG };
+})();
+</script>
+
+</body>
+</html>
