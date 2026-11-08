@@ -272,7 +272,7 @@
    All data lives in localStorage on this device. No network calls.
    ================================================================ */
 
-var APP_VERSION = "1.1";
+var APP_VERSION = "1.1.1";
 var LS_KEY = "fieldforms_v1";
 var TYPES = {
   co:    {label:"Change Order",       badge:"b-co",    icon:"📝"},
@@ -1312,15 +1312,15 @@ if(typeof module !== "undefined" && module.exports){
     <button type="button" class="ww-legal-close" id="wwLegalPageClose">← Back</button>
     <h2>Legal</h2>
     <h3>Terms of Use</h3>
-    <div id="wwLegalTermsText"><h2>Terms of Use — White Wolf Digital Apps</h2>
+    <div id="wwLegalTermsText"><h2>Terms of Use — White Wolf Apps</h2>
 <p><strong>Version 1.0</strong></p>
-<p><strong>Seller: White Wolf Tree Service LLC, selling digital products under the name &quot;White Wolf Digital&quot;</strong></p>
+<p><strong>Seller: White Wolf Apps</strong></p>
 <p><strong>Contact: whitewolfbackoffice@gmail.com</strong></p>
 <hr>
 <h3>1. What you&#x27;re buying</h3>
-<p>Our apps (including ForgeFit AI, ForgeKitchen, TreeBid Pro, SnowBid,</p>
-<p>WashPrice Pro, RoofSquares, JobProfit Tracker, PastureLedger, and the other</p>
-<p>titles sold under White Wolf Digital) are single-file software tools. When</p>
+<p>Our apps (including LogEasy, ForgeKitchen, BranchMath, SnowBid,</p>
+<p>GrimeMath, RoofSquares, ProfitFlag, PastureLedger, and the other</p>
+<p>titles sold under White Wolf Apps) are single-file software tools. When</p>
 <p>you buy one, you are buying a <strong>license to use the file</strong>, not ownership of</p>
 <p>the software itself.</p>
 <h3>2. Your license</h3>
@@ -1420,12 +1420,12 @@ if(typeof module !== "undefined" && module.exports){
 <p>These terms are governed by the laws of the <strong>State of Oklahoma</strong>, USA.</p>
 <p>(Attorney to confirm governing law and venue before publication.)</p>
 <h3>11. Contact</h3>
-<p>White Wolf Tree Service LLC (White Wolf Digital) —</p>
+<p>White Wolf Apps —</p>
 <p>whitewolfbackoffice@gmail.com.</p>
 <hr>
 <h3>CONNECTED FEATURES — takes effect only when these features ship</h3>
 <p>*The sections below apply only to future connected features (device sync via</p>
-<p>Health Connect, AI voice logging, and the AI Goal Preview in ForgeFit). They</p>
+<p>Health Connect, AI voice logging, and the AI Goal Preview in LogEasy). They</p>
 <p>do not apply to the current offline versions, which never transmit data.*</p>
 <ul>
 <li><strong>Opt-in only.</strong> Connected features are off by default. Each one asks for</li>
@@ -1468,12 +1468,12 @@ if(typeof module !== "undefined" && module.exports){
     <h3>Privacy</h3>
     <p>This app has no accounts and collects no data. Everything you enter is stored only on this device, in this browser's local storage. Nothing is uploaded, tracked, or shared. Exported backup files are under your control — where you store or send them is up to you. If you clear your browser data, lose your device, or uninstall the app, your records may be permanently lost, so keep backups using the app's export tools.</p>
     <p id="wwLegalAcceptLine"></p>
-    <p><strong>Sold by White Wolf Tree Service LLC (White Wolf Digital) — whitewolfbackoffice@gmail.com</strong></p>
+    <p><strong>Sold by White Wolf Apps — whitewolfbackoffice@gmail.com</strong></p>
   </div>
 </div>
 
 <script>
-/* White Wolf Digital — in-app legal pattern v1 (Terms acceptance + Settings > Legal) */
+/* White Wolf Apps — in-app legal pattern v1 (Terms acceptance + Settings > Legal) */
 const TERMS_VERSION = "1.0";
 (function(){
   var WW_KEY = "fieldforms_v1";
@@ -1671,10 +1671,43 @@ const TERMS_VERSION = "1.0";
       var lab = document.querySelector('label[for="' + f.id + '"]');
       if (lab) name = lab.textContent;
     }
+    if (!name && f.closest) {
+      var wrapLab = f.closest("label");
+      if (wrapLab) name = wrapLab.textContent;
+    }
+    if (!name && f.closest) {
+      var td = f.closest("td");
+      if (td && td.parentNode) {
+        var cellIdx = 0, sib = td;
+        while ((sib = sib.previousElementSibling)) cellIdx++;
+        var tbl = f.closest("table");
+        var hrow = tbl ? tbl.querySelector("tr") : null;
+        var hcell = hrow ? hrow.children[cellIdx] : null;
+        if (hcell && hcell.tagName === "TH" && hcell.textContent && hcell.textContent.trim()) name = hcell.textContent;
+      }
+    }
     if (!name) {
-      var prev = f.closest ? f.closest("div") : null;
-      var l2 = prev ? prev.querySelector("label") : null;
-      if (l2) name = l2.textContent;
+      var node = f.parentNode, depth = 0;
+      while (node && depth < 4 && !name) {
+        if (node.querySelectorAll) {
+          var labs = node.querySelectorAll("label");
+          if (labs.length) {
+            var fields = 0, all = node.querySelectorAll("input, textarea");
+            for (var i = 0; i < all.length; i++) {
+              var t = (all[i].getAttribute("type") || "text").toLowerCase();
+              if (all[i].tagName === "TEXTAREA" || t === "text" || t === "number") fields++;
+            }
+            if (fields === 1) name = labs[0].textContent;
+            else {
+              var pv = f.previousElementSibling;
+              if ((!pv || pv.tagName !== "LABEL") && f.parentNode) pv = f.parentNode.previousElementSibling;
+              if (pv && pv.tagName === "LABEL") name = pv.textContent;
+            }
+            if (!name) break;
+          }
+        }
+        node = node.parentNode; depth++;
+      }
     }
     if (!name) name = f.getAttribute("placeholder") || f.getAttribute("name") || "field";
     return String(name).replace(/\s+/g, " ").trim().slice(0, 60) || "field";
