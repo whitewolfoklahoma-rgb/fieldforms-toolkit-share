@@ -166,13 +166,13 @@
 
 
 <nav class="nav" id="mainNav">
-  <button data-nav="library" class="active">📁 Document Library</button>
-  <button data-nav="co" class="new">+ Change Order</button>
-  <button data-nav="punch" class="new">+ Punch List</button>
-  <button data-nav="log" class="new">+ Daily Log</button>
-  <button data-nav="jsa" class="new">+ Safety Assessment</button>
-  <button data-nav="company">🏢 Company Profile</button>
-  <button data-nav="help">❓ Help</button>
+  <button data-nav="library" class="active"><span class="ic">📁</span><span class="lb">Document Library</span></button>
+  <button data-nav="co" class="new"><span class="ic">+</span><span class="lb">Change Order</span></button>
+  <button data-nav="punch" class="new"><span class="ic">+</span><span class="lb">Punch List</span></button>
+  <button data-nav="log" class="new"><span class="ic">+</span><span class="lb">Daily Log</span></button>
+  <button data-nav="jsa" class="new"><span class="ic">+</span><span class="lb">Safety Assessment</span></button>
+  <button data-nav="company"><span class="ic">🏢</span><span class="lb">Company Profile</span></button>
+  <button data-nav="help"><span class="ic">❓</span><span class="lb">Help</span></button>
 </nav>
 
 <main>
@@ -255,8 +255,8 @@
         <li>Signature is a typed name rendered in script style, not a drawn signature.</li>
       </ul>
       <h3>Need help?</h3>
-      <p id="helpVersion">PaperBoots v1.1</p>
-      <p><a id="helpEmailBtn" class="btn" style="display:inline-flex;align-items:center;min-height:48px;text-decoration:none" href="mailto:whitewolfbackoffice@gmail.com?subject=PaperBoots%20help%20%E2%80%94%20v1.1&amp;body=Tell%20us%20what%20you%20were%20trying%20to%20do%20and%20what%20happened%3A%0A%0A">✉️ Email us</a></p>
+      <p id="helpVersion">PaperBoots v1.2.0</p>
+      <p><a id="helpEmailBtn" class="btn" style="display:inline-flex;align-items:center;min-height:48px;text-decoration:none" href="mailto:whitewolfbackoffice@gmail.com?subject=PaperBoots%20help%20%E2%80%94%20v1.2.0&amp;body=Tell%20us%20what%20you%20were%20trying%20to%20do%20and%20what%20happened%3A%0A%0A">✉️ Email us</a></p>
       <p class="hint">The button opens your own mail app with our address and the app version already in the subject line — nothing is sent until you press send there.</p>
     </div>
   </section>
@@ -272,7 +272,7 @@
    All data lives in localStorage on this device. No network calls.
    ================================================================ */
 
-var APP_VERSION = "1.1.1";
+var APP_VERSION = "1.2.0";
 var LS_KEY = "fieldforms_v1";
 var TYPES = {
   co:    {label:"Change Order",       badge:"b-co",    icon:"📝"},
@@ -1282,6 +1282,46 @@ if(typeof module !== "undefined" && module.exports){
 .ww-legal-check input{width:22px;height:22px;min-width:22px;margin-top:1px;cursor:pointer}
 .ww-legal-agree[disabled]{opacity:.45;cursor:not-allowed}
 [hidden]{display:none !important}
+</style>
+<style id="pbRedesign">
+/* ===== PaperBoots v1.2.0 — modern app look (catalog redesign wave 3, presentation only) ===== */
+:root{--radius:16px;--bar-h:64px;--shadow:0 2px 6px rgba(22,50,79,.08),0 10px 26px rgba(22,50,79,.09)}
+body{padding-bottom:calc(var(--bar-h) + env(safe-area-inset-bottom) + 20px)}
+.app-header{position:sticky;top:0;z-index:30;background:linear-gradient(135deg,#0e2438,var(--navy) 55%,var(--navy2));box-shadow:0 2px 12px rgba(22,50,79,.35)}
+.app-header .logo{width:50px;height:50px;border-radius:15px;background:linear-gradient(145deg,#f3bc66,var(--accent) 55%,#c77f1a);color:#221a08;border:none;display:flex;align-items:center;justify-content:center;font-size:21px;padding:0;box-shadow:inset 0 1px 0 rgba(255,255,255,.55),0 3px 8px rgba(0,0,0,.3)}
+.app-header .co-name{font-size:20px}
+#mainNav{position:fixed;left:0;right:0;bottom:0;top:auto;z-index:60;background:rgba(255,255,255,.97);border-top:1px solid var(--line);box-shadow:0 -3px 16px rgba(22,50,79,.13);padding:6px 6px calc(6px + env(safe-area-inset-bottom));flex-wrap:nowrap;gap:2px}
+#mainNav button{flex:1;background:none;border:none;color:var(--muted);padding:4px 1px 5px;border-radius:14px;min-height:56px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;font-weight:700;font-size:11px}
+#mainNav button:hover{background:rgba(31,78,121,.06)}
+#mainNav button .ic{font-size:20px;line-height:1.15;padding:3px 10px;border-radius:999px;transition:background .15s}
+#mainNav button .lb{font-size:10.5px;letter-spacing:0;text-align:center;line-height:1.15}
+#mainNav button.active{background:none;color:var(--navy)}
+#mainNav button.active .ic{background:var(--accent);box-shadow:0 2px 6px rgba(232,163,61,.5)}
+#mainNav button.new .ic{font-size:22px;font-weight:800;color:var(--navy2)}
+#mainNav button.new.active .ic{color:#221a08}
+.view.active{animation:pbTabIn .28s ease both}
+@keyframes pbTabIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.card{border-radius:var(--radius);box-shadow:var(--shadow)}
+.stat{border-radius:14px;box-shadow:0 1px 4px rgba(22,50,79,.08)}
+.doc-row{border-radius:var(--radius);box-shadow:0 1px 4px rgba(22,50,79,.07)}
+.btn{border-radius:999px;min-height:48px;padding:10px 18px}
+.btn.small{border-radius:999px;min-height:40px}
+.field input,.field select{border-radius:12px;min-height:48px;padding:10px 12px}
+.field textarea{border-radius:12px;padding:10px 12px}
+.lib-tools input[type=search],.lib-tools select{border-radius:12px;min-height:48px}
+.status-pill{border-radius:999px}
+.empty{border-radius:var(--radius)}
+.total-box{border-radius:14px}
+.toast{bottom:calc(var(--bar-h) + env(safe-area-inset-bottom) + 16px);border-radius:999px}
+.ww-legal-overlay .ww-legal-card{border-radius:22px;padding:26px 20px 22px}
+.ww-legal-card::before{content:"🥾";display:flex;align-items:center;justify-content:center;width:76px;height:76px;margin:0 auto 12px;border-radius:22px;background:linear-gradient(145deg,#2a628f,#1f4e79 55%,#16324f);font-size:40px;box-shadow:inset 0 1px 0 rgba(255,255,255,.35),0 4px 10px rgba(0,0,0,.25)}
+.ww-legal-card h2{text-align:center}
+.ww-legal-card h3{text-align:center}
+.ww-legal-card h2::after{content:"Welcome to PaperBoots — change orders, punch lists, daily logs and safety forms, all on your device.";display:block;text-align:center;font-weight:400;color:#5c6b7a;font-size:15px;margin-top:8px;line-height:1.45}
+.ww-legal-btn{border-radius:999px}
+.ww-legal-btn.ww-legal-agree{background:linear-gradient(145deg,#2a628f,#1f4e79 55%,#16324f);border-color:#16324f;min-height:56px;font-size:17.5px}
+.ww-legal-close{border-radius:999px}
+@media print{body{padding-bottom:0}}
 </style>
 
 <div id="wwLegalOverlay" class="ww-legal-overlay" hidden>
